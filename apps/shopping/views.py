@@ -11,7 +11,6 @@ class ShoppingListView(FormView):
     success_url = '/shopping/list/'
 
     def form_valid(self, form):
-        print('valid')
         form.save(commit=True)
         return super().form_valid(form)
 

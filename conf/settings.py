@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-fb&&h=#6(vopcvka#)m@ch1qngxde2^h6@-^+9voteq)ycla)y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
