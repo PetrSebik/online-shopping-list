@@ -9,6 +9,7 @@ packages = [{include = "online_shopping_list"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 django = "4.2.5"
+djangorestframework = "3.14.0"
 
 
 [build-system]

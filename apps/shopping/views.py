@@ -1,8 +1,10 @@
 from django.shortcuts import redirect
 from django.views import View
 from django.views.generic.edit import FormView
+from rest_framework import generics
 from .forms import AddItemForm
 from .models import Item
+from .serializers import ItemSerializer
 
 
 class ShoppingListView(FormView):
@@ -30,3 +32,18 @@ class RemoveItemView(View):
             pass  # Handle the case where the item does not exist (optional)
 
         return redirect('shopping_list')  # Redirect to the shopping list view
+
+
+class AddItemRestView(generics.CreateAPIView):
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+
+
+class RemoveItemRestView(generics.DestroyAPIView):
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
+
+
+class ListItemsRestView(generics.ListAPIView):
+    serializer_class = ItemSerializer
+    queryset = Item.objects.all()
