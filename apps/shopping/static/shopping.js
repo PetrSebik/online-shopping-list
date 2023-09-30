@@ -1,3 +1,16 @@
+let displayedItemIds = [];
+
+function initializeDisplayedItemIds() {
+    let listItems = document.querySelectorAll('[id^="item-"]');
+    listItems.forEach(item => {
+        // Extract the item ID from the ID attribute
+        let itemId = parseInt(item.id.replace('item-', ''), 10);
+        if (!isNaN(itemId)) {
+            displayedItemIds.push(itemId);
+        }
+    });
+}
+
 function addItem(event) {
     event.preventDefault();
     let itemNameInput = document.getElementById('item-value');
@@ -20,6 +33,8 @@ function addItem(event) {
         .catch(error => {
             console.error('Error:', error);
         });
+
+    focusInput();
     return false;
 }
 
@@ -27,6 +42,17 @@ function fetchItems() {
     fetch('/shopping/items/list/')
         .then(response => response.json())
         .then(data => {
+            let fetchedItemIds = data.map(item => item.id);
+            let removedItemIds = displayedItemIds.filter(id => !fetchedItemIds.includes(id));
+
+            removedItemIds.forEach(id => {
+                let listItem = document.getElementById(`item-${id}`);
+                if (listItem) {
+                    listItem.remove();
+                }
+                displayedItemIds = displayedItemIds.filter(item => item !== id);
+            });
+
             data.forEach(item => {
                 updateList(item);
             });
@@ -92,10 +118,19 @@ function removeItem(itemId) {
         });
 }
 
+function focusInput() {
+    let itemValueInput = document.getElementById('item-value');
+    itemValueInput.focus();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     let button = document.getElementById('add-btn');
 
+    focusInput();
+
     button.addEventListener('click', addItem);
+
+    initializeDisplayedItemIds();
 
     document.querySelectorAll('[id^="remove-"]').forEach(removeLink => {
         let itemId = removeLink.id.replace('remove-', '');
