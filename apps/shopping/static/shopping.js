@@ -96,6 +96,8 @@ function updateList(item) {
         // add the <li> element to the <ul> element
         let listContainer = document.getElementById('list-items');
         listContainer.appendChild(listItem);
+        displayedItemIds.push(item.id);
+        console.log(displayedItemIds)
     }
 }
 
