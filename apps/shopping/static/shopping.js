@@ -97,7 +97,6 @@ function updateList(item) {
         let listContainer = document.getElementById('list-items');
         listContainer.appendChild(listItem);
         displayedItemIds.push(item.id);
-        console.log(displayedItemIds)
     }
 }
 
