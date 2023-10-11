@@ -5,6 +5,7 @@ from .views import (
     AddItemRestView,
     RemoveItemRestView,
     ListItemsRestView,
+    SvelteTestView,
 )
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('item/', AddItemRestView.as_view(), name='rest_add_item'),
     path('item/<int:pk>/', RemoveItemRestView.as_view(), name='rest_remove_item'),
     path('items/list/', ListItemsRestView.as_view(), name='rest_item_view'),
+    path('svelte/', SvelteTestView.as_view(), name='svelte'),
 ]

@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 from django.views import View
+from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from rest_framework import generics
 from .forms import AddItemForm
@@ -47,3 +48,7 @@ class RemoveItemRestView(generics.DestroyAPIView):
 class ListItemsRestView(generics.ListAPIView):
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
+
+
+class SvelteTestView(TemplateView):
+    template_name = 'svelte_test.html'
