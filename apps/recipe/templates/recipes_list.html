@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="container-fluid h-90-overflow p-3">
+        <div class="row mb-5">
+            <div class="col-lg-6">
+                <ul id="list-items" class="list-group">
+                    {% for recipe in recipes %}
+                        <li id="item-{{ recipe.id }}"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+                            <a class="text-decoration-none" href="{% url 'recipe_detail' pk=recipe.id %}">
+                                <span class="recipe-name">{{ recipe.name|default_if_none:"none" }}</span>
+                            </a>
+                            <span class="last-cooked-date ms-auto">{{ recipe.last_cooked_date|default_if_none:"" }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{#    <nav class="navbar navbar-light bg-light input-section fixed-bottom h-10">#}
+{#        <div class="container-fluid justify-content-end">#}
+{#            <div class="col col-3 d-flex justify-content-center align-items-center">#}
+{#                <a class="btn btn-lg btn-primary">Edit</a>#}
+{#            </div>#}
+{#            <div class="col col-3 d-flex justify-content-center align-items-center">#}
+{#                <a href="{% url 'recipe_create' %}" class="btn btn-lg btn-primary">Add</a>#}
+{#            </div>#}
+{#        </div>#}
+{#    </nav>#}
+
+{% endblock %}

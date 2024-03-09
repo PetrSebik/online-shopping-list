@@ -49,6 +49,3 @@ class ListItemsRestView(generics.ListAPIView):
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
 
-
-class SvelteTestView(TemplateView):
-    template_name = 'svelte_test.html'

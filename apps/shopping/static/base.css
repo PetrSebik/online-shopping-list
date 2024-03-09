@@ -1,0 +1,41 @@
+body {
+    background-color: #e0e8f0; /* Light pink background color */
+}
+
+.h-90-overflow {
+    height: 90vh;
+    overflow-y: auto;
+}
+
+.h-10 {
+    height: 10vh;
+}
+
+.bg-white {
+    background-color: white;
+}
+
+.recipe-name {
+    color: black;
+    font-weight: bold;
+}
+
+.item-name {
+    color: black;
+    font-weight: bold;
+}
+
+.last-cooked-date {
+    color: gray;
+}
+
+.step-number {
+    display: inline-block;
+    background-color: lightseagreen;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    line-height: 24px;
+}

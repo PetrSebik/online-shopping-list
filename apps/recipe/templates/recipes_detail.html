@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+    <div class="container-fluid p-3">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3>Suroviny</h3>
+            </div>
+            <div class="card-body p-0">
+                <ul id="list-items" class="list-group">
+                    {% for item in recipe.items.all %}
+                        <li class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                <div class="row">
+                                    <p class="mb-0">
+                                <span class="item-name">
+                                    {{ item.name }}
+                                </span>
+                                        {{ item.count }} {{ item.units }}
+                                    </p>
+                                </div>
+                            </div>
+                            {% if item.description %}
+                                <div class="mb-2 text-muted">{{ item.description }}</div>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">
+                            Žadné suroviny nebyly zadány
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3>Postup</h3>
+            </div>
+            <div class="card-body p-0">
+                <ul id="list-items" class="list-group">
+                    {% for step in recipe.get_ordered_steps %}
+                        <li class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                <div class="row">
+                                    <p class="mb-0">
+                                <span class="step-number">
+                                    {{ step.number }}
+                                </span>
+                                        {{ step.text }}
+                                    </p>
+                                </div>
+                            </div>
+                            {% if item.description %}
+                                <div class="mb-2 text-muted">{{ item.description }}</div>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">
+                            Žadný postup nebyl zadán
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

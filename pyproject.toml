@@ -10,6 +10,7 @@ packages = [{include = "online_shopping_list"}]
 python = "^3.10"
 django = "4.2.5"
 djangorestframework = "3.14.0"
+django-debug-toolbar = "^4.3.0"
 
 
 [build-system]

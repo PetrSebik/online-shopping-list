@@ -18,9 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import RedirectView
 
-
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name='shopping_list', permanent=True)),
     path("admin/", admin.site.urls),
-    path("shopping/", include('apps.shopping.urls'))
+    path("shopping/", include('apps.shopping.urls')),
+    path("recipe/", include('apps.recipe.urls')),
+    path("__debug__/", include("debug_toolbar.urls")),
 ]
