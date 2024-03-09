@@ -17,7 +17,7 @@
                                 <span class="item-name">
                                     {{ item.name }}
                                 </span>
-                                        {{ item.count }} {{ item.units }}
+                                        {{ item.count|default_if_none:"" }} {{ item.units|default_if_none:"" }}
                                     </p>
                                 </div>
                             </div>

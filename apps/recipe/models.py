@@ -14,7 +14,7 @@ class RecipeItem(models.Model):
     recipe = models.ForeignKey("recipe.Recipe", on_delete=models.CASCADE, related_name="items")
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=128, blank=True, null=True)
-    count = models.PositiveIntegerField(default=1)
+    count = models.PositiveIntegerField(default=1, blank=True, null=True)
     units = models.CharField(max_length=8, null=True, blank=True)
 
 
