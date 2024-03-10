@@ -1,6 +1,5 @@
 from django.shortcuts import redirect
 from django.views import View
-from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from rest_framework import generics
 from .forms import AddItemForm

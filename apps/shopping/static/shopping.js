@@ -17,11 +17,13 @@ function addItem(event) {
     let itemName = itemNameInput.value;
 
     let itemData = {name: itemName};
+    let csrfTokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
 
     fetch('/shopping/item/', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrfTokenInput.value
         },
         body: JSON.stringify(itemData)
     })
@@ -101,8 +103,12 @@ function updateList(item) {
 }
 
 function removeItem(itemId) {
+    let csrfTokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
     fetch(`/shopping/item/${itemId}/`, {
         method: 'DELETE',
+        headers: {
+            "X-CSRFToken": csrfTokenInput.value
+        },
     })
         .then(response => {
             if (response.ok) {
