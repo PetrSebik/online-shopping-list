@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body %}
+
+    <div class="container-fluid h-90-overflow p-3">
+        <div class="row mb-5">
+            <div class="col-lg-6"
+                 hx-get="{% url 'htmx_shopping_list' %}"
+                 hx-trigger="load, every 5s"
+                 hx-target="#list-items">
+                <ul id="list-items" class="list-group">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-light bg-light input-section fixed-bottom h-10">
+        <div class="container-fluid justify-content-center">
+            <form class="row w-100"
+                  hx-post="{% url 'htmx_shopping_item' %}"
+                  hx-target="#list-items"
+                  hx-swap="beforeend"
+                  hx-on::after-request="if(event.detail.successful) this.reset(); document.getElementById('item-value').focus()">
+                {% csrf_token %}
+                <div class="col">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="item-value" placeholder="item"
+                               name="name" autofocus="autofocus">
+                        <label for="item-value">Item Name</label>
+                    </div>
+                </div>
+                <div class="col col-3 d-flex justify-content-center align-items-center">
+                    <button id="add-btn" class="btn btn-lg btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </nav>
+
+{% endblock %}
