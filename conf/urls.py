@@ -19,7 +19,7 @@ from django.urls import path, include
 from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    path("", RedirectView.as_view(pattern_name='shopping_list', permanent=True)),
+    path("", RedirectView.as_view(pattern_name='htmx_shopping', permanent=True)),
     path("admin/", admin.site.urls),
     path("shopping/", include('apps.shopping.urls')),
     path("recipe/", include('apps.recipe.urls')),
