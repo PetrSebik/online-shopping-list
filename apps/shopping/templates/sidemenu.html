@@ -1,0 +1,40 @@
+{% load static %}
+{% load component_tags %}
+
+<div class="sidebar" id="side_nav">
+    <div class="header-box px-3 pt-2 pb-2 d-flex justify-content-between">
+
+        <a href="{% url "shopping_list" %}" class="text-decoration-none">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="32px"
+                 width="32px" id="Capa_1" viewBox="0 0 155.139 155.139" xml:space="preserve">
+                <g>
+                    <g>
+                        <path style="fill:#010002;"
+                              d="M125.967,51.533V20.314h-16.862V38.06L77.569,12.814L0,74.869h21.361v67.455h112.416v-67.45h21.361    L125.967,51.533z M125.925,134.472H97.546V82.37H57.58v52.103H29.202V71.146l48.356-38.689l48.355,38.689v63.326H125.925z"/>
+                    </g>
+                </g>
+                </svg>
+        </a>
+        <button class="btn d-lg-none d-block close-btn px-1 py-0" id="mobile-menu-close-btn">
+            <h3 class="mb-0 bi bi-x-lg"></h3>
+        </button>
+    </div>
+
+    <ul class="list-unstyled" id="mainMenu">
+
+        <hr class="h-color mx-1">
+
+        {% component "menu_item" request=request redirect_to="shopping_list" url_names="shopping_list" %}
+            {% fill "label" %}
+                Shopping List
+            {% endfill %}
+        {% endcomponent %}
+
+        {% component "menu_item" request=request redirect_to="recipes_list" url_names="recipes_list" %}
+            {% fill "label" %}
+                Recipe List
+            {% endfill %}
+        {% endcomponent %}
+    </ul>
+
+</div>

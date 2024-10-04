@@ -30,22 +30,20 @@
         </div>
     </div>
 
-    <nav class="navbar navbar-light bg-light input-section fixed-bottom h-10">
-        <div class="container-fluid justify-content-center">
-            <form class="row w-100">
-                {% csrf_token %}
-                <div class="col">
-                    <div class="form-floating">
-                        <input type="text" class="form-control" id="item-value" placeholder="item"
-                               name="name" autofocus="autofocus">
-                        <label for="item-value">Item Name</label>
-                    </div>
+    <div class="input-section fixed-bottom bg-light">
+        <form class="row p-1">
+            {% csrf_token %}
+            <div class="col">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="item-value" placeholder="item"
+                           name="name" autofocus="autofocus">
+                    <label for="item-value">Item Name</label>
                 </div>
-                <div class="col col-3 d-flex justify-content-center align-items-center">
-                    <button id="add-btn" class="btn btn-lg btn-primary">Add</button>
-                </div>
-            </form>
-        </div>
-    </nav>
+            </div>
+            <div class="col col-auto px-3 d-flex justify-content-center align-items-center">
+                <button id="add-btn" class="btn btn-lg btn-primary">Add</button>
+            </div>
+        </form>
+    </div>
 
 {% endblock %}

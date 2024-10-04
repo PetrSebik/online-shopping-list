@@ -1,0 +1,7 @@
+{% load component_tags %}
+
+<li class="my-1 menu-li-cadet">
+    <a href="{% slot "href" %}{% url redirect_to %}{% endslot %}" class="rounded text-decoration-none">
+        {% slot "label" %}{{ label }}{% endslot %}
+    </a>
+</li>

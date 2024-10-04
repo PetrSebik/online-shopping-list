@@ -1,0 +1,14 @@
+{% load component_tags %}
+
+<li class="{% if active %}active{% endif %} rounded-0">
+    {% if pk_kwarg %}
+        <a href="{% url redirect_to pk_kwarg %}" class="text-decoration-none px-3 py-2 d-block">
+    {% else %}
+        <a href="{% url redirect_to %}" class="text-decoration-none px-3 py-2 d-block">
+    {% endif %}
+    <i class="fal fa-home"></i>
+    {% slot "label" %}
+        Placeholder
+    {% endslot %}
+    </a>
+</li>

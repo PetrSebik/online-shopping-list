@@ -15,6 +15,7 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 ROOT_DIR = Path(__file__).parents[1]
+BASE_DIR = ROOT_DIR
 APPS_DIR = ROOT_DIR / "apps"
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # "debug_toolbar",
+    "django_components",
     "apps.shopping",
     "apps.recipe",
 ]
@@ -59,7 +61,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [ROOT_DIR / "templates"],
-        "APP_DIRS": True,
+        "APP_DIRS": False,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -67,8 +69,21 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            'loaders': [(
+                'django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                    'django_components.template_loader.Loader',
+                ]
+            )],
         },
     },
+]
+
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "django_components.finders.ComponentsFileSystemFinder",
 ]
 
 WSGI_APPLICATION = "conf.wsgi.application"
@@ -127,3 +142,9 @@ STATIC_ROOT = os.path.join(ROOT_DIR, 'static')
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+COMPONENTS = {
+    "dirs": [
+        os.path.join(BASE_DIR, "components"),
+    ],
+}

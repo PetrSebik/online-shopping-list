@@ -2,6 +2,14 @@ body {
     background-color: #e0e8f0; /* Light pink background color */
 }
 
+:root {
+    --light-gray: #e0e0e0;
+    --menu-bg: #d1e7dd;
+    --menu-bg-active: #30c984;
+    --glacous-gray: #fff;
+    --input-background-color: #e9ecef;
+}
+
 .h-90-overflow {
     height: 90vh;
     overflow-y: auto;
@@ -38,4 +46,98 @@ body {
     height: 24px;
     text-align: center;
     line-height: 24px;
+}
+
+
+#side_nav {
+    background: var(--menu-bg);
+    min-width: 250px;
+    max-width: 250px;
+    transition: all 0.3s;
+    overflow-y: scroll;
+    scrollbar-width: none;
+}
+
+#side_nav::-webkit-scrollbar {
+    display: none;
+}
+
+.content {
+    min-height: 100vh;
+    width: 100%;
+}
+
+hr.h-color {
+    background: #000;
+}
+
+.sidebar li.active {
+    background: var(--menu-bg-active);
+    border-radius: 8px;
+}
+
+.sidebar li.active a, .sidebar li.active a:hover {
+    color: #000;
+}
+
+.sidebar li a {
+    color: #000;
+}
+
+@media (max-width: 992px) {
+    #side_nav {
+        margin-left: -250px;
+        position: absolute;
+        height: 100%;
+        overflow-y: scroll;
+        z-index: 999;
+    }
+
+    #side_nav.active {
+        margin-left: 0;
+    }
+}
+
+.custom-badge {
+    background-color: red;
+    border-radius: 33%;
+}
+
+.nav-link.active {
+    background-color: var(--menu-bg-active) !important;
+}
+
+.menu-li-cadet:before {
+    content: "\F231";
+    font-family: bootstrap-icons !important;
+    font-style: normal;
+    font-weight: normal !important;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    vertical-align: -.125em;
+    margin-right: 5px;
+}
+
+.bg-task-mobile, .bg-deadline-mobile {
+    background-color: #d1e7dd;
+}
+
+.input-section {
+    position: fixed;
+    bottom: 0;
+    width: calc(100% - 250px);
+    left: 250px;
+    z-index: 1000;
+}
+
+@media (max-width: 992px) {
+    .input-section {
+        width: 100%;
+        left: 0;
+    }
+}
+
+.input-section .container-fluid {
+    height: 100px;
 }
