@@ -128,7 +128,7 @@ hr.h-color {
     bottom: 0;
     width: calc(100% - 250px);
     left: 250px;
-    z-index: 1000;
+    z-index: 900;
 }
 
 @media (max-width: 992px) {
