@@ -1,12 +1,13 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView
-from .models import Recipe
+
 from .forms import CreateRecipeForm, RecipeItemFormSet, RecipeStepFormSet
+from .models import Recipe
 
 
 class RecipesListView(ListView):
     template_name = 'recipes_list.html'
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.prefetch_related('tags').all()
     context_object_name = 'recipes'
 
 

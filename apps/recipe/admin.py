@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Recipe, RecipeItem, RecipeStep
+
+from .models import Recipe, RecipeItem, RecipeStep, Tag
 
 
 class RecipeItemInline(admin.TabularInline):
@@ -26,3 +27,8 @@ class RecipeItemAdmin(admin.ModelAdmin):
 @admin.register(RecipeStep)
 class RecipeStepAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'number', 'text')
+
+
+@admin.register(Tag)
+class TagsAdmin(admin.ModelAdmin):
+    list_display = ('name', 'color',)

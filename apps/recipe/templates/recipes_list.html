@@ -11,7 +11,15 @@
                             <a class="text-decoration-none" href="{% url 'recipe_detail' pk=recipe.id %}">
                                 <span class="recipe-name">{{ recipe.name|default_if_none:"none" }}</span>
                             </a>
-                            <span class="last-cooked-date ms-auto">{{ recipe.last_cooked_date|default_if_none:"" }}</span>
+                            <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 ms-3">
+                                {% for tag in recipe.tags.all %}
+                                    <span class="badge"
+                                          style="background-color: {{ tag.color }}; color: {{ tag.text_color }}">
+                                  {{ tag.name }}
+                              </span>
+                                {% endfor %}
+                                <span class="last-cooked-date">{{ recipe.last_cooked_date|default_if_none:"" }}</span>
+                            </div>
                         </li>
                     {% endfor %}
                 </ul>
@@ -19,15 +27,15 @@
         </div>
     </div>
 
-{#    <nav class="navbar navbar-light bg-light input-section fixed-bottom h-10">#}
-{#        <div class="container-fluid justify-content-end">#}
-{#            <div class="col col-3 d-flex justify-content-center align-items-center">#}
-{#                <a class="btn btn-lg btn-primary">Edit</a>#}
-{#            </div>#}
-{#            <div class="col col-3 d-flex justify-content-center align-items-center">#}
-{#                <a href="{% url 'recipe_create' %}" class="btn btn-lg btn-primary">Add</a>#}
-{#            </div>#}
-{#        </div>#}
-{#    </nav>#}
+    {#    <nav class="navbar navbar-light bg-light input-section fixed-bottom h-10">#}
+    {#        <div class="container-fluid justify-content-end">#}
+    {#            <div class="col col-3 d-flex justify-content-center align-items-center">#}
+    {#                <a class="btn btn-lg btn-primary">Edit</a>#}
+    {#            </div>#}
+    {#            <div class="col col-3 d-flex justify-content-center align-items-center">#}
+    {#                <a href="{% url 'recipe_create' %}" class="btn btn-lg btn-primary">Add</a>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    </nav>#}
 
 {% endblock %}

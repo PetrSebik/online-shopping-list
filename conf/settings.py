@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # "debug_toolbar",
+    "colorfield",
     "django_components",
     "apps.shopping",
     "apps.recipe",
