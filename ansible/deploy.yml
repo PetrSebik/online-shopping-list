@@ -25,6 +25,7 @@
         version: main
         force: yes
       become: false
+      notify: Restart Gunicorn
 
     - name: Ensure pipenv is installed
       pip:
@@ -51,6 +52,6 @@
   handlers:
     - name: Restart Gunicorn
       systemd:
-        name: gunicorn
+        name: shopping_gunicorn
         state: restarted
         enabled: true
