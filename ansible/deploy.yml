@@ -1,0 +1,56 @@
+---
+- name: Deploy website
+  hosts: web
+  become: true
+
+  vars:
+    django_settings_module: conf.settings
+
+  environment:
+    DJANGO_SETTINGS_MODULE: "{{ django_settings_module }}"
+    PIPENV_VENV_IN_PROJECT: "1"
+
+  tasks:
+    - name: Ensure project directory exists
+      file:
+        path: "{{ project_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Pull latest code from Git
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ project_dir }}"
+        version: main
+        force: yes
+      become: false
+
+    - name: Ensure pipenv is installed
+      pip:
+        name: pipenv
+        executable: pip3
+
+    - name: Install dependencies using Pipenv
+      command: pipenv install --python python3
+      args:
+        chdir: "{{ project_dir }}"
+        creates: "{{ project_dir }}/Pipfile.lock"
+
+#    - name: Run migrations
+#      command: pipenv run python manage.py migrate
+#      args:
+#        chdir: "{{ project_dir }}"
+#      notify: Restart Gunicorn
+#
+#    - name: Collect static files
+#      command: pipenv run python manage.py collectstatic --noinput
+#      args:
+#        chdir: "{{ project_dir }}"
+
+  handlers:
+    - name: Restart Gunicorn
+      systemd:
+        name: gunicorn
+        state: restarted
+        enabled: true
