@@ -11,7 +11,7 @@
                             <li id="item-{{ recipe.id }}"
                                 class="list-group-item d-flex justify-content-between align-items-center">
                                 <a class="text-decoration-none" href="{% url 'recipe_detail' pk=recipe.id %}">
-                                    <span class="recipe-name">AAA {{ recipe.name|default_if_none:"none" }}</span>
+                                    <span class="recipe-name">{{ recipe.name|default_if_none:"none" }}</span>
                                 </a>
                                 <div class="d-flex flex-wrap align-items-center justify-content-end gap-2 ms-3">
                                     {% for tag in recipe.tags.all %}
