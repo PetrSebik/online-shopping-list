@@ -23,5 +23,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("shopping/", include('apps.shopping.urls')),
     path("recipe/", include('apps.recipe.urls')),
+    path("clockify/", include('apps.clockify.urls')),
     path("__debug__/", include("debug_toolbar.urls")),
 ]

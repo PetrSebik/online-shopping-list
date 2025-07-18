@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load clockify_filters %}
+
+{% block body %}
+    <div class="container py-4">
+        <h2 class="mb-4">Clockify Monthly Summary</h2>
+
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body">
+                    <p>Working days passed: <strong>{{ working_days_passed }} / {{ total_working_days }}</strong></p>
+                    <p>Total hours worked: <strong>{{ total_hours }}</strong></p>
+                    <p>Planned hours by now: <strong>{{ plan_hours_passed }}</strong></p>
+                    <p>Total monthly plan: <strong>{{ total_plan_hours }}</strong></p>
+
+                    {% if ahead %}
+                        <p>You're <strong>{{ diff_hours }}</strong> ahead of schedule ✅</p>
+                    {% elif behind %}
+                        <p>You're <strong>{{ diff_hours }}</strong> behind schedule ⚠️</p>
+                    {% else %}
+                        <p>You're exactly on schedule 🎯</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
