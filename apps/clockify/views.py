@@ -1,26 +1,17 @@
-from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView
-from django.utils.timezone import now
-import requests
-from decimal import Decimal
 import calendar
+from decimal import Decimal
 
-from .models import ClockifySettings
+import requests
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
+from django.views.generic import TemplateView
+
+from .models import ClockifySettings, Vacation
+from .utils import get_working_days_in_month, get_working_days_passed
+
 
 class ClockifyMonthlySummaryView(TemplateView):
     template_name = "clockify.html"
-
-    def get_working_days_in_month(self, year, month):
-        c = calendar.Calendar()
-        days = c.itermonthdays2(year, month)  # (day, weekday)
-        working_days = [day for day, weekday in days if day != 0 and weekday < 5]  # Mon-Fri
-        return len(working_days)
-
-    def get_working_days_passed(self, year, month, today):
-        c = calendar.Calendar()
-        days = c.itermonthdays2(year, month)
-        working_days = [day for day, weekday in days if day != 0 and weekday < 5 and day <= today.day]
-        return len(working_days)
 
     @staticmethod
     def format_hours_minutes(hours_decimal: float) -> str:
@@ -31,15 +22,15 @@ class ClockifyMonthlySummaryView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         uuid = kwargs.get("uuid")
-        settings = get_object_or_404(ClockifySettings, pk=uuid)
-        if not settings:
+        clockify_setting = get_object_or_404(ClockifySettings, pk=uuid)
+        if not clockify_setting:
             return self.render_to_response({"error": "Clockify settings not configured."})
 
         today = now().date()
         year, month = today.year, today.month
 
-        total_working_days = self.get_working_days_in_month(year, month)
-        working_days_passed = self.get_working_days_passed(year, month, today)
+        total_working_days = get_working_days_in_month(year, month)
+        working_days_passed = get_working_days_passed(year, month, today)
 
         # Prepare the request body exactly as you use it for the summary API
         request_body = {
@@ -51,7 +42,7 @@ class ClockifyMonthlySummaryView(TemplateView):
             "zoomLevel": "MONTH",
             "users": {
                 "contains": "CONTAINS",
-                "ids": [settings.user_id],
+                "ids": [clockify_setting.user_id],
                 "status": "ACTIVE_WITH_PENDING",
                 "numberOfDeleted": 0
             },
@@ -61,9 +52,9 @@ class ClockifyMonthlySummaryView(TemplateView):
             }
         }
 
-        url = f"https://reports.api.clockify.me/v1/workspaces/{settings.workspace_id}/reports/summary"
+        url = f"https://reports.api.clockify.me/v1/workspaces/{clockify_setting.workspace_id}/reports/summary"
         headers = {
-            "X-Api-Key": settings.api_key,
+            "X-Api-Key": clockify_setting.api_key,
             "Content-Type": "application/json"
         }
 
@@ -78,18 +69,20 @@ class ClockifyMonthlySummaryView(TemplateView):
         total_seconds = data.get("totals", [{}])[0].get("totalTime", 0)
         total_hours = Decimal(total_seconds) / Decimal(3600)
 
-        plan_hours_passed = settings.hours_per_day * working_days_passed
-        total_plan_hours = settings.hours_per_day * total_working_days
+        plan_hours_passed = clockify_setting.hours_per_day_plan * working_days_passed
+        total_plan_hours = clockify_setting.total_hours_plan
         diff_hours = total_hours - plan_hours_passed
 
         context = {
             "total_hours": self.format_hours_minutes(total_hours),
             "plan_hours_passed": self.format_hours_minutes(plan_hours_passed),
+            "hours_per_day_plan": self.format_hours_minutes(clockify_setting.hours_per_day_plan),
             "total_plan_hours": self.format_hours_minutes(total_plan_hours),
             "diff_hours": self.format_hours_minutes(abs(diff_hours)),
             "behind": diff_hours < 0,
             "ahead": diff_hours > 0,
             "working_days_passed": working_days_passed,
-            "total_working_days": total_working_days,
+            "total_working_days": Vacation.working_days_this_month(),
+            "vacations_days": Vacation.working_vacation_days_in_month()
         }
         return self.render_to_response(context)
