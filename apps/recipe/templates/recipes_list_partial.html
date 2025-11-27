@@ -7,7 +7,7 @@
                         style="background-color: {{ tag.color }}; color: {{ tag.text_color }};"
                         hx-get="{% url 'recipes_list_filtered' %}?tags={% for id in active_tag_ids %}{% if id != tag.id %}{{ id }},{% endif %}{% endfor %}"
                         hx-target="#recipes-container"
-                        hx-swap="innerHTML">
+                        hx-swap="outerHTML">
                     {{ tag.name }}
                 </button>
             {% else %}
@@ -16,7 +16,7 @@
                         style="background-color: #e9ecef; color: #000;"
                         hx-get="{% url 'recipes_list_filtered' %}?tags={% for id in active_tag_ids %}{{ id }},{% endfor %}{{ tag.id }}"
                         hx-target="#recipes-container"
-                        hx-swap="innerHTML">
+                        hx-swap="outerHTML">
                     {{ tag.name }}
                 </button>
             {% endif %}
