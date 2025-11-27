@@ -39,4 +39,4 @@ class RecipeItem(models.Model):
 class RecipeStep(models.Model):
     recipe = models.ForeignKey("recipe.Recipe", on_delete=models.CASCADE, related_name="steps")
     number = models.PositiveIntegerField(default=1)
-    text = models.CharField(max_length=256)
+    text = models.TextField(max_length=1024)

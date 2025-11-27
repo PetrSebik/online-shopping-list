@@ -19,16 +19,6 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = [RecipeItemInline, RecipeStepInline]
 
 
-@admin.register(RecipeItem)
-class RecipeItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'recipe', 'count', 'units', 'description')
-
-
-@admin.register(RecipeStep)
-class RecipeStepAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'number', 'text')
-
-
 @admin.register(Tag)
 class TagsAdmin(admin.ModelAdmin):
     list_display = ('name', 'color',)
