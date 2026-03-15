@@ -103,11 +103,19 @@
 {% endblock %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2"><i class="bi bi-list-ol me-2"></i>Priority od nejvyšší po nejnižší</h1>
+    <div class="d-flex justify-content-between align-items-start align-items-md-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="h2 mb-0">
+                <i class="bi bi-list-ol me-2"></i>Priority
+            </h1>
+            <p class="text-muted mb-0 small mt-1">
+                Seřazeno od nejvyšší po nejnižší
+            </p>
+        </div>
+
         {% if user.is_authenticated %}
             <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addPriorityModal">
-                <i class="bi bi-plus-lg"></i> Nová priorita
+                <i class="bi bi-plus-lg me-1"></i> Nová priorita
             </button>
         {% endif %}
     </div>
@@ -124,58 +132,19 @@
                              data-bs-target="#details{{ item.id }}"
                              style="cursor: pointer;">
 
-                            <div class="priority-badge-container me-3">
-                            <span class="badge rounded-pill priority-badge-custom fs-6">
-                                {{ item.priority_level }}
-                            </span>
+                            <div class="priority-badge-container me-3 flex-shrink-0 text-center" style="width: 45px;">
+                    <span class="badge rounded-pill priority-badge-custom fs-6">
+                        {{ item.priority_level }}
+                    </span>
                             </div>
 
                             <div class="flex-grow-1">
                                 <span class="fw-bold fs-5 text-dark">{{ item.task_name }}</span>
-                                <small class="text-muted ms-2">
+                                <small class="text-muted ms-2 d-none d-md-inline">
                                     <i class="bi bi-chevron-down"></i>
                                 </small>
                             </div>
                         </div>
-
-                        {% if user.is_authenticated %}
-                            <div class="ms-3 pe-3">
-                                <button type="button" class="btn btn-link text-danger p-0 border-0"
-                                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}"
-                                        title="Smazat prioritu">
-                                    <i class="bi bi-trash fs-5"></i>
-                                </button>
-                            </div>
-
-                            <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-sm">
-                                    <div class="modal-content border-0 shadow-lg">
-                                        <div class="modal-header bg-danger text-white border-0">
-                                            <h5 class="modal-title fs-6">
-                                                <i class="bi bi-exclamation-triangle me-2"></i>Smazat položku?
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white"
-                                                    data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body text-center py-4">
-                                            <p class="mb-0">Opravdu chcete
-                                                odstranit:<br><strong>{{ item.task_name }}</strong>?</p>
-                                        </div>
-                                        <div class="modal-footer border-0 d-flex justify-content-center pb-4">
-                                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
-                                                Zrušit
-                                            </button>
-                                            <form method="post" action="{% url 'priority_delete' item.pk %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger px-4 shadow-sm">Ano,
-                                                    smazat
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
                     </div>
 
                     <div class="collapse bg-light" id="details{{ item.id }}">
@@ -191,17 +160,52 @@
                                     {% if item.attachment %}
                                         <a href="{{ item.attachment.url }}" class="btn btn-sm btn-outline-dark"
                                            target="_blank">
-                                            <i class="bi bi-file-earmark-arrow-down me-1"></i> Otevřít přílohu
+                                            <i class="bi bi-file-earmark-arrow-down me-1"></i> {{ item.attachment.name|cut:"construction_docs/" }}
                                         </a>
                                     {% endif %}
                                 </div>
 
                                 {% if user.is_authenticated %}
-                                    <div>
+                                    <div class="d-flex gap-2">
                                         <a href="{% url 'priority_edit' item.pk %}"
                                            class="btn btn-sm btn-outline-primary border-0">
                                             <i class="bi bi-pencil-square me-1"></i> Upravit
                                         </a>
+
+                                        <button type="button" class="btn btn-sm btn-outline-danger border-0"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}">
+                                            <i class="bi bi-trash me-1"></i> Smazat
+                                        </button>
+                                    </div>
+
+                                    <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                                            <div class="modal-content border-0 shadow-lg">
+                                                <div class="modal-header bg-danger text-white border-0">
+                                                    <h5 class="modal-title fs-6">
+                                                        <i class="bi bi-exclamation-triangle me-2"></i>Smazat položku?
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                            data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-center py-4">
+                                                    <p class="mb-0">Opravdu chcete
+                                                        odstranit:<br><strong>{{ item.task_name }}</strong>?</p>
+                                                </div>
+                                                <div class="modal-footer border-0 d-flex justify-content-center pb-4">
+                                                    <button type="button" class="btn btn-light px-4"
+                                                            data-bs-dismiss="modal">Zrušit
+                                                    </button>
+                                                    <form method="post" action="{% url 'priority_delete' item.pk %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger px-4 shadow-sm">Ano,
+                                                            smazat
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 {% endif %}
                             </div>

@@ -19,9 +19,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path("", include("apps.core.urls")),
+    path(
+        "stavba", RedirectView.as_view(pattern_name="priority_list", permanent=False)
+    ),
     path("admin/", admin.site.urls),
     path("shopping/", include("apps.shopping.urls")),
     path("recipe/", include("apps.recipe.urls")),
