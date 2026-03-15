@@ -5,6 +5,7 @@ from .views import (
     PriorityDeleteView,
     QADeleteView,
     QAUpdateView,
+    PriorityUpdateView,
 )
 
 urlpatterns = [
@@ -13,6 +14,9 @@ urlpatterns = [
         "priorities/<int:pk>/delete/",
         PriorityDeleteView.as_view(),
         name="priority_delete",
+    ),
+    path(
+        "priorities/<int:pk>/edit/", PriorityUpdateView.as_view(), name="priority_edit"
     ),
     path("questions/", QAListView.as_view(), name="qa_list"),
     path("questions/<int:pk>/delete/", QADeleteView.as_view(), name="qa_delete"),

@@ -23,22 +23,76 @@
             top: 0;
         }
 
-        /* Barvy proužků - můžeš si upravit podle vkusu */
-        .bg-priority-high {
-            background-color: #dc3545;
+        /* Custom colors for priorities 1-10 */
+        .prio-10 {
+            --prio-color: #dc3545;
         }
 
-        /* Červená pro 8-10 */
-        .bg-priority-medium {
-            background-color: #ffc107;
+        /* Red */
+        .prio-9 {
+            --prio-color: #e44d3a;
         }
 
-        /* Žlutá pro 5-7 */
-        .bg-priority-low {
-            background-color: #17a2b8;
+        .prio-8 {
+            --prio-color: #eb642f;
         }
 
-        /* Tyrkysová pro 1-4 */
+        .prio-7 {
+            --prio-color: #f37c24;
+        }
+
+        .prio-6 {
+            --prio-color: #faa319;
+        }
+
+        .prio-5 {
+            --prio-color: #ffc107;
+        }
+
+        /* Yellow */
+        .prio-4 {
+            --prio-color: #cbd32d;
+        }
+
+        .prio-3 {
+            --prio-color: #97b452;
+        }
+
+        .prio-2 {
+            --prio-color: #64a678;
+        }
+
+        .prio-1 {
+            --prio-color: #198754;
+        }
+
+        /* Green */
+
+        /* Apply the variable to the strip */
+        .priority-strip {
+            width: 6px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: var(--prio-color);
+        }
+
+        /* Apply the variable to the badge */
+        .priority-badge-custom {
+            background-color: var(--prio-color);
+            color: white;
+            /* Ensure text is readable on yellow (prio 5) */
+            color: #fff;
+            text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Special case for yellow/light colors to keep text readable */
+        .prio-5 .priority-badge-custom,
+        .prio-6 .priority-badge-custom {
+            color: #212529;
+            text-shadow: none;
+        }
 
         /* Zarovnání pro badge s číslem priority */
         .priority-badge-container {
@@ -50,7 +104,7 @@
 
 {% block content %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2"><i class="bi bi-list-ol me-2"></i>Priority</h1>
+        <h1 class="h2"><i class="bi bi-list-ol me-2"></i>Priority od nejvyšší po nejnižší</h1>
         {% if user.is_authenticated %}
             <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addPriorityModal">
                 <i class="bi bi-plus-lg"></i> Nová priorita
@@ -61,77 +115,65 @@
     <div class="card shadow-sm border-0">
         <div class="list-group list-group-flush">
             {% for item in priorities %}
-                <div class="list-group-item p-0 border-0 position-relative">
+                <div class="list-group-item p-0 border-0 position-relative prio-{{ item.priority_level }}">
+                    <div class="priority-strip"></div>
 
-                    <div class="priority-strip
-                {% if item.priority_level >= 8 %}bg-priority-high
-                {% elif item.priority_level >= 5 %}bg-priority-medium
-                {% else %}bg-priority-low{% endif %}">
-                    </div>
+                    <div class="d-flex align-items-center p-3 priority-row ms-2">
+                        <div class="d-flex align-items-center flex-grow-1"
+                             data-bs-toggle="collapse"
+                             data-bs-target="#details{{ item.id }}"
+                             style="cursor: pointer;">
 
-                    <div class="d-flex align-items-center p-3 priority-row ms-2"
-                         data-bs-toggle="collapse"
-                         data-bs-target="#details{{ item.id }}"
-                         aria-expanded="false"
-                         aria-controls="details{{ item.id }}">
+                            <div class="priority-badge-container me-3">
+                            <span class="badge rounded-pill priority-badge-custom fs-6">
+                                {{ item.priority_level }}
+                            </span>
+                            </div>
 
-                        <div class="priority-badge-container me-3">
-                    <span class="badge rounded-pill
-                        {% if item.priority_level >= 8 %}bg-danger
-                        {% elif item.priority_level >= 5 %}bg-warning text-dark
-                        {% else %}bg-info text-white{% endif %} fs-6">
-                        {{ item.priority_level }}
-                    </span>
-                        </div>
-
-                        <div class="flex-grow-1">
-                            <span class="fw-bold fs-5 text-dark">{{ item.task_name }}</span>
-                            {% if item.description or item.attachment %}
-                                <small class="text-muted ms-2" title="Zobrazit detaily">
+                            <div class="flex-grow-1">
+                                <span class="fw-bold fs-5 text-dark">{{ item.task_name }}</span>
+                                <small class="text-muted ms-2">
                                     <i class="bi bi-chevron-down"></i>
                                 </small>
-                            {% endif %}
+                            </div>
                         </div>
 
                         {% if user.is_authenticated %}
-                            <div class="ms-3">
-                                <form method="post" action="{% url 'priority_delete' item.pk %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="button" class="btn btn-link text-danger p-0 border-0"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}"
-                                            title="Smazat prioritu">
-                                        <i class="bi bi-trash fs-5"></i>
-                                    </button>
-                                    <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1"
-                                         aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered modal-sm">
-                                            <div class="modal-content border-0 shadow-lg">
-                                                <div class="modal-header bg-danger text-white border-0">
-                                                    <h5 class="modal-title fs-6"><i
-                                                            class="bi bi-exclamation-triangle me-2"></i>Smazat položku?
-                                                    </h5>
-                                                    <button type="button" class="btn-close btn-close-white"
-                                                            data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body text-center py-4">
-                                                    <p class="mb-0">Opravdu chcete
-                                                        odstranit:<br><strong>{{ item.task_name }}</strong>?</p>
-                                                </div>
-                                                <div class="modal-footer border-0 d-flex justify-content-center pb-4">
-                                                    <button type="button" class="btn btn-light px-4"
-                                                            data-bs-dismiss="modal">Zrušit
-                                                    </button>
-                                                    <form method="post" action="{% url 'priority_delete' item.pk %}">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-danger px-4 shadow-sm">Ano,
-                                                            smazat
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
+                            <div class="ms-3 pe-3">
+                                <button type="button" class="btn btn-link text-danger p-0 border-0"
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}"
+                                        title="Smazat prioritu">
+                                    <i class="bi bi-trash fs-5"></i>
+                                </button>
+                            </div>
+
+                            <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-sm">
+                                    <div class="modal-content border-0 shadow-lg">
+                                        <div class="modal-header bg-danger text-white border-0">
+                                            <h5 class="modal-title fs-6">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>Smazat položku?
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white"
+                                                    data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body text-center py-4">
+                                            <p class="mb-0">Opravdu chcete
+                                                odstranit:<br><strong>{{ item.task_name }}</strong>?</p>
+                                        </div>
+                                        <div class="modal-footer border-0 d-flex justify-content-center pb-4">
+                                            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
+                                                Zrušit
+                                            </button>
+                                            <form method="post" action="{% url 'priority_delete' item.pk %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger px-4 shadow-sm">Ano,
+                                                    smazat
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
-                                </form>
+                                </div>
                             </div>
                         {% endif %}
                     </div>
@@ -139,19 +181,30 @@
                     <div class="collapse bg-light" id="details{{ item.id }}">
                         <div class="p-3 border-top ms-5">
                             {% if item.description %}
-                                <p class="mb-2 text-dark">{{ item.description|linebreaks }}</p>
+                                <div class="mb-2 text-dark">{{ item.description|linebreaks }}</div>
                             {% else %}
                                 <p class="mb-2 text-muted small"><em>Bez detailního popisu.</em></p>
                             {% endif %}
 
-                            {% if item.attachment %}
-                                <div class="mt-3">
-                                    <a href="{{ item.attachment.url }}" class="btn btn-sm btn-outline-dark"
-                                       target="_blank">
-                                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Otevřít přílohu
-                                    </a>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    {% if item.attachment %}
+                                        <a href="{{ item.attachment.url }}" class="btn btn-sm btn-outline-dark"
+                                           target="_blank">
+                                            <i class="bi bi-file-earmark-arrow-down me-1"></i> Otevřít přílohu
+                                        </a>
+                                    {% endif %}
                                 </div>
-                            {% endif %}
+
+                                {% if user.is_authenticated %}
+                                    <div>
+                                        <a href="{% url 'priority_edit' item.pk %}"
+                                           class="btn btn-sm btn-outline-primary border-0">
+                                            <i class="bi bi-pencil-square me-1"></i> Upravit
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -159,6 +212,7 @@
                 <div class="p-5 text-center text-muted border-top">Seznam priorit je momentálně prázdný.</div>
             {% endfor %}
         </div>
+    </div>
     </div>
 
     {% if user.is_authenticated %}
@@ -173,7 +227,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="task_name" class="form-label fw-bold">Název úkolu</label>
+                            <label for="task_name" class="form-label fw-bold">Název priority</label>
                             <input type="text" name="task_name" id="task_name" class="form-control"
                                    placeholder="Co je třeba udělat?" required>
                         </div>
@@ -185,20 +239,19 @@
                         <div class="row">
                             <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label for="priority_level" class="form-label fw-bold">Jak moc to spěchá?</label>
+                                    <label for="priority_level" class="form-label fw-bold">Jak moc to prioritní?</label>
                                     <select name="priority_level" id="priority_level"
                                             class="form-select form-select-lg">
-                                        <option value="10" class="text-danger fw-bold">10 - Absolutní priorita
-                                        </option>
-                                        <option value="9">9 - Velmi urgentní</option>
-                                        <option value="8">8 - Urgentní</option>
-                                        <option value="7">7 - Vysoká důležitost</option>
+                                        <option value="10" class="text-danger fw-bold">10 - Kritické</option>
+                                        <option value="9">9 - Nezbytné</option>
+                                        <option value="8">8 - Vysoká priorita</option>
+                                        <option value="7">7 - Preferované</option>
                                         <option value="6">6 - Důležité</option>
-                                        <option value="5" selected>5 - Standardní</option>
+                                        <option value="5" selected>5 - Standard</option>
                                         <option value="4">4 - Vedlejší</option>
-                                        <option value="3">3 - Nízká priorita</option>
+                                        <option value="3">3 - Bonus</option>
                                         <option value="2">2 - Odložitelné</option>
-                                        <option value="1">1 - Výhledově</option>
+                                        <option value="1">1 - Luxus / Výhledově</option>
                                     </select>
                                 </div>
                             </div>

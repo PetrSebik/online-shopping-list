@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import DeleteView, UpdateView
 from django.urls import reverse_lazy
 
-from .forms import ConstructionQAForm
+from .forms import ConstructionQAForm, PriorityItemForm
 from .models import PriorityItem, ConstructionQA
 
 
@@ -52,6 +52,13 @@ class QAListView(ListView):
             form.save()
 
         return redirect("qa_list")
+
+
+class PriorityUpdateView(LoginRequiredMixin, UpdateView):
+    model = PriorityItem
+    form_class = PriorityItemForm
+    template_name = "priority_edit.html"
+    success_url = reverse_lazy("priority_list")
 
 
 class QADeleteView(LoginRequiredMixin, DeleteView):

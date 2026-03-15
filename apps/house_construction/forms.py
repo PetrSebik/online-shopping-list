@@ -1,5 +1,5 @@
 from django import forms
-from .models import ConstructionQA
+from .models import ConstructionQA, PriorityItem
 
 class ConstructionQAForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -15,3 +15,14 @@ class ConstructionQAForm(forms.ModelForm):
             'question': forms.TextInput(attrs={'placeholder': 'Zadejte vaši otázku...'}),
             'answer': forms.Textarea(attrs={'placeholder': 'Zde dopište odpověď...', 'rows': 4}),
         }
+
+
+class PriorityItemForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+
+    class Meta:
+        model = PriorityItem
+        fields = ['task_name', 'description', 'priority_level', 'attachment']
