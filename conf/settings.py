@@ -45,9 +45,11 @@ INSTALLED_APPS = [
     # "debug_toolbar",
     "colorfield",
     "django_components",
+    "apps.core",
     "apps.shopping",
     "apps.recipe",
     "apps.clockify",
+    "apps.house_construction",
 ]
 
 MIDDLEWARE = [
@@ -144,6 +146,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(ROOT_DIR, 'static')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -154,3 +158,8 @@ COMPONENTS = {
         os.path.join(BASE_DIR, "components"),
     ],
 }
+
+# AUTH_USER_MODEL = 'core.User'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'priority_list'
+LOGOUT_REDIRECT_URL = 'priority_list'

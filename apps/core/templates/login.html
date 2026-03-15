@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Přihlášení | Stavba Domu{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #d6e0f0 100%);
+        min-height: 100vh;
+    }
+    .login-container {
+        margin-top: 10vh;
+    }
+    .card-login {
+        border: none;
+        border-radius: 1.25rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .house-icon-circle {
+        width: 80px;
+        height: 80px;
+        background: #198754; /* Stavbařská zelená */
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: -40px auto 20px;
+        box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+    }
+    .btn-login {
+        padding: 0.8rem;
+        font-weight: 600;
+        background-color: #198754;
+        border: none;
+    }
+    .btn-login:hover {
+        background-color: #146c43;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center login-container">
+    <div class="col-11 col-sm-8 col-md-6 col-lg-4">
+        <div class="card card-login">
+            <div class="card-body p-5">
+                <div class="house-icon-circle">
+                    <i class="bi bi-cone-striped fs-1"></i>
+                </div>
+
+                <h2 class="text-center fw-bold mb-2">Vítejte zpět</h2>
+                <p class="text-center text-muted mb-4 small">Přihlášení do správy stavby rodinného domu</p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger py-2 small border-0 shadow-sm" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Nesprávné jméno nebo heslo.
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase text-muted">Uživatelské jméno</label>
+                        <div class="input-group">
+                            <span class="input-group-text text-muted bg-white"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" class="form-control" placeholder="Např. stavebnik" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase text-muted">Heslo</label>
+                        <div class="input-group">
+                            <span class="input-group-text text-muted bg-white"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-login w-100 mb-3 shadow-sm">
+                        Vstoupit do správy <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

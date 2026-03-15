@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Otázky a Odpovědi | Stavba{% endblock %}
+
+{% block extra_head %}
+    {{ form.media }}
+    <style>
+        .qa-row {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .qa-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-strip {
+            width: 6px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .bg-unresolved {
+            background-color: #ffc107;
+        }
+
+        .bg-resolved {
+            background-color: #198754;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h2"><i class="bi bi-chat-left-text me-2"></i>Dotazy pro firmu</h2>
+        {% if user.is_authenticated %}
+            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addQAModal">
+                <i class="bi bi-patch-question me-1"></i> Položit dotaz
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="list-group list-group-flush">
+            {% for qa in questions %}
+                <div class="list-group-item p-0 border-0 position-relative">
+
+                    <div class="status-strip {% if qa.is_resolved %}bg-success{% else %}bg-warning{% endif %}"></div>
+
+                    <div class="d-flex align-items-center p-3 qa-row ms-2"
+                         data-bs-toggle="collapse"
+                         data-bs-target="#ans{{ qa.id }}">
+
+                        <div class="flex-grow-1">
+                            <span class="fw-bold fs-5">{{ qa.question }}</span>
+                            {% if qa.is_resolved %}
+                                <span class="badge bg-success-subtle text-success ms-2">Zodpovězeno</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-dark ms-2">Čeká na odpověď</span>
+                            {% endif %}
+                        </div>
+
+                        <i class="bi bi-chevron-down text-muted"></i>
+                    </div>
+
+                    <div class="collapse" id="ans{{ qa.id }}">
+                        <div class="p-4 border-top bg-white ms-3">
+                            <h6 class="fw-bold text-uppercase small text-muted mb-3">Odpověď / Vyjádření:</h6>
+                            <div class="rich-text-content">
+                                {% if qa.answer %}
+                                    {{ qa.answer|safe }}
+                                {% else %}
+                                    <p class="text-muted italic">Zatím bez odpovědi...</p>
+                                {% endif %}
+                            </div>
+
+                            {% if user.is_authenticated %}
+                                <div class="mt-3 pt-3 border-top d-flex justify-content-end gap-2">
+                                    <a href="{% url 'qa_edit' qa.id %}" class="btn btn-sm btn-outline-primary border-0">
+                                        <i class="bi bi-pencil"></i> Upravit / Odpovědět
+                                    </a>
+
+                                    <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal"
+                                            data-bs-target="#deleteQAModal{{ qa.id }}">
+                                        <i class="bi bi-trash"></i> Smazat
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                    <div class="modal fade" id="deleteQAModal{{ qa.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                            <div class="modal-content border-0">
+                                <div class="modal-body text-center p-4">
+                                    <i class="bi bi-exclamation-circle text-danger fs-1 mb-3 d-block"></i>
+                                    <p>Opravdu smazat tento dotaz?</p>
+                                    <form method="post" action="{% url 'qa_delete' qa.id %}">
+                                        {% csrf_token %}
+                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Zrušit
+                                        </button>
+                                        <button type="submit" class="btn btn-danger">Ano, smazat</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+            {% empty %}
+                <div class="p-5 text-center text-muted">Žádné dotazy nebyly položeny.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+        <div class="modal fade" id="addQAModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <form method="post" class="modal-content border-0 shadow-lg">
+                    {% csrf_token %}
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold">Nový dotaz / Zápis</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Otázka</label>
+                            <input type="text" name="question" class="form-control"
+                                   placeholder="Co potřebujete vyjasnit?" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Odpověď</label>
+                            <textarea name="answer" id="editor" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0">
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm">Uložit dotaz</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+    </script>
+{% endblock %}
+
+
+                                    <select name="priority_level" id="priority_level"
+                                            class="form-select form-select-lg">
+                                        <option value="10" class="text-danger fw-bold">10 - Absolutní priorita
+                                        </option>
+                                        <option value="9">9 - Velmi urgentní</option>
+                                        <option value="8">8 - Urgentní</option>
+                                        <option value="7">7 - Vysoká důležitost</option>
+                                        <option value="6">6 - Důležité</option>
+                                        <option value="5" selected>5 - Standardní</option>
+                                        <option value="4">4 - Vedlejší</option>
+                                        <option value="3">3 - Nízká priorita</option>
+                                        <option value="2">2 - Odložitelné</option>
+                                        <option value="1">1 - Výhledově</option>
+                                    </select>

@@ -14,15 +14,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path("", RedirectView.as_view(pattern_name='htmx_shopping', permanent=True)),
+    path("", RedirectView.as_view(pattern_name="htmx_shopping", permanent=True)),
+    path("", include("apps.core.urls")),
     path("admin/", admin.site.urls),
-    path("shopping/", include('apps.shopping.urls')),
-    path("recipe/", include('apps.recipe.urls')),
-    path("clockify/", include('apps.clockify.urls')),
+    path("shopping/", include("apps.shopping.urls")),
+    path("recipe/", include("apps.recipe.urls")),
+    path("clockify/", include("apps.clockify.urls")),
+    path("house-construction/", include("apps.house_construction.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
-]
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

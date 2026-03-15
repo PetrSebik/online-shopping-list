@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Upravit dotaz{% endblock %}
+
+{% block extra_head %}
+{{ form.media }} {% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Upravit dotaz / Odpověď</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Otázka</label>
+                        {{ form.question }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Odpověď</label>
+                        {{ form.answer }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'qa_list' %}" class="btn btn-light">Zpět na seznam</a>
+                        <button type="submit" class="btn btn-success px-4">Uložit změny</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

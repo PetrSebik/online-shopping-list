@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Priority Stavby{% endblock %}
+
+{% block extra_head %}
+    <style>
+        /* Styly pro čistší vzhled řádku a decentní hover efekt */
+        .priority-row {
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .priority-row:hover {
+            background-color: #f8f9fa; /* Velmi světlý šedý hover */
+        }
+
+        /* Definice barevných proužků pro různé úrovně priorit */
+        .priority-strip {
+            width: 6px; /* Šířka proužku */
+            height: 100%; /* Plná výška řádku */
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Barvy proužků - můžeš si upravit podle vkusu */
+        .bg-priority-high {
+            background-color: #dc3545;
+        }
+
+        /* Červená pro 8-10 */
+        .bg-priority-medium {
+            background-color: #ffc107;
+        }
+
+        /* Žlutá pro 5-7 */
+        .bg-priority-low {
+            background-color: #17a2b8;
+        }
+
+        /* Tyrkysová pro 1-4 */
+
+        /* Zarovnání pro badge s číslem priority */
+        .priority-badge-container {
+            width: 50px;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2"><i class="bi bi-list-ol me-2"></i>Priority</h1>
+        {% if user.is_authenticated %}
+            <button class="btn btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addPriorityModal">
+                <i class="bi bi-plus-lg"></i> Nová priorita
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="list-group list-group-flush">
+            {% for item in priorities %}
+                <div class="list-group-item p-0 border-0 position-relative">
+
+                    <div class="priority-strip
+                {% if item.priority_level >= 8 %}bg-priority-high
+                {% elif item.priority_level >= 5 %}bg-priority-medium
+                {% else %}bg-priority-low{% endif %}">
+                    </div>
+
+                    <div class="d-flex align-items-center p-3 priority-row ms-2"
+                         data-bs-toggle="collapse"
+                         data-bs-target="#details{{ item.id }}"
+                         aria-expanded="false"
+                         aria-controls="details{{ item.id }}">
+
+                        <div class="priority-badge-container me-3">
+                    <span class="badge rounded-pill
+                        {% if item.priority_level >= 8 %}bg-danger
+                        {% elif item.priority_level >= 5 %}bg-warning text-dark
+                        {% else %}bg-info text-white{% endif %} fs-6">
+                        {{ item.priority_level }}
+                    </span>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <span class="fw-bold fs-5 text-dark">{{ item.task_name }}</span>
+                            {% if item.description or item.attachment %}
+                                <small class="text-muted ms-2" title="Zobrazit detaily">
+                                    <i class="bi bi-chevron-down"></i>
+                                </small>
+                            {% endif %}
+                        </div>
+
+                        {% if user.is_authenticated %}
+                            <div class="ms-3">
+                                <form method="post" action="{% url 'priority_delete' item.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-link text-danger p-0 border-0"
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}"
+                                            title="Smazat prioritu">
+                                        <i class="bi bi-trash fs-5"></i>
+                                    </button>
+                                    <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                                            <div class="modal-content border-0 shadow-lg">
+                                                <div class="modal-header bg-danger text-white border-0">
+                                                    <h5 class="modal-title fs-6"><i
+                                                            class="bi bi-exclamation-triangle me-2"></i>Smazat položku?
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white"
+                                                            data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-center py-4">
+                                                    <p class="mb-0">Opravdu chcete
+                                                        odstranit:<br><strong>{{ item.task_name }}</strong>?</p>
+                                                </div>
+                                                <div class="modal-footer border-0 d-flex justify-content-center pb-4">
+                                                    <button type="button" class="btn btn-light px-4"
+                                                            data-bs-dismiss="modal">Zrušit
+                                                    </button>
+                                                    <form method="post" action="{% url 'priority_delete' item.pk %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger px-4 shadow-sm">Ano,
+                                                            smazat
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="collapse bg-light" id="details{{ item.id }}">
+                        <div class="p-3 border-top ms-5">
+                            {% if item.description %}
+                                <p class="mb-2 text-dark">{{ item.description|linebreaks }}</p>
+                            {% else %}
+                                <p class="mb-2 text-muted small"><em>Bez detailního popisu.</em></p>
+                            {% endif %}
+
+                            {% if item.attachment %}
+                                <div class="mt-3">
+                                    <a href="{{ item.attachment.url }}" class="btn btn-sm btn-outline-dark"
+                                       target="_blank">
+                                        <i class="bi bi-file-earmark-arrow-down me-1"></i> Otevřít přílohu
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="p-5 text-center text-muted border-top">Seznam priorit je momentálně prázdný.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+        <div class="modal fade" id="addPriorityModal" tabindex="-1" aria-labelledby="addPriorityModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <form method="post" enctype="multipart/form-data" class="modal-content">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title text-uppercase fw-bold" id="addPriorityModalLabel">Nová priorita</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="task_name" class="form-label fw-bold">Název úkolu</label>
+                            <input type="text" name="task_name" id="task_name" class="form-control"
+                                   placeholder="Co je třeba udělat?" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold">Popis (volitelný)</label>
+                            <textarea name="description" id="description" class="form-control" rows="3"
+                                      placeholder="Podrobnosti, poznámky..."></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="priority_level" class="form-label fw-bold">Jak moc to spěchá?</label>
+                                    <select name="priority_level" id="priority_level"
+                                            class="form-select form-select-lg">
+                                        <option value="10" class="text-danger fw-bold">10 - Absolutní priorita
+                                        </option>
+                                        <option value="9">9 - Velmi urgentní</option>
+                                        <option value="8">8 - Urgentní</option>
+                                        <option value="7">7 - Vysoká důležitost</option>
+                                        <option value="6">6 - Důležité</option>
+                                        <option value="5" selected>5 - Standardní</option>
+                                        <option value="4">4 - Vedlejší</option>
+                                        <option value="3">3 - Nízká priorita</option>
+                                        <option value="2">2 - Odložitelné</option>
+                                        <option value="1">1 - Výhledově</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="mb-3">
+                                    <label for="attachment" class="form-label fw-bold">Příloha (volitelná)</label>
+                                    <input type="file" name="attachment" id="attachment"
+                                           class="form-control form-control-lg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
+                        <button type="submit" class="btn btn-success px-4">Uložit prioritu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

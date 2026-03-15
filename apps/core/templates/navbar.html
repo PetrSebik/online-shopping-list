@@ -1,0 +1,50 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'priority_list' %}">
+            <i class="bi bi-house-door-fill me-2 text-success"></i>Stavba Domu
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'priority_list' %}active{% endif %}"
+                       href="{% url 'priority_list' %}">
+                        <i class="bi bi-list-check me-1"></i> Priority
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'qa_list' %}active{% endif %}"
+                       href="{% url 'qa_list' %}">
+                        <i class="bi bi-chat-dots me-1"></i> Otázky a odpovědi
+                    </a>
+                </li>
+            </ul>
+
+            <div class="navbar-nav align-items-lg-center">
+                {% if user.is_authenticated %}
+                    <div class="d-flex align-items-center">
+                        <span class="navbar-text text-light me-3 d-none d-lg-inline">
+                            <i class="bi bi-person-circle text-success me-1"></i>
+                            <strong>{{ user.username }}</strong>
+                        </span>
+
+                        <form method="post" action="{% url 'logout' %}" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger border-0 py-1 px-3">
+                                <i class="bi bi-box-arrow-right me-1"></i>Odhlásit
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light px-4 py-1">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Přihlásit se
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
