@@ -10,6 +10,7 @@ from .views import (
     MediaUpdateView,
     MediaDetailView,
     MediaDeleteView,
+    AdditionalImageDeleteView
 )
 
 urlpatterns = [
@@ -29,4 +30,9 @@ urlpatterns = [
     path("media/<int:pk>/", MediaDetailView.as_view(), name="media_detail"),
     path("media/<int:pk>/edit/", MediaUpdateView.as_view(), name="media_edit"),
     path("media/<int:pk>/delete/", MediaDeleteView.as_view(), name="media_delete"),
+    path(
+        "media/extra/<int:pk>/delete/",
+        AdditionalImageDeleteView.as_view(),
+        name="delete_extra_image",
+    ),
 ]

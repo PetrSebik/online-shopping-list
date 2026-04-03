@@ -1,14 +1,12 @@
 {% extends "base_housing.html" %}
 
-{% block title %}Media{% endblock %}
+{% block title %}Upravit média{% endblock %}
 
 {% block content %}
-
-
     <div class="container py-4">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card shadow-sm border-0">
+                <div class="card shadow-sm border-0 mb-4">
                     <div class="card-header bg-dark text-white p-3">
                         <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Upravit média</h5>
                     </div>
@@ -37,13 +35,40 @@
                                 </div>
                             </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Změnit obrázek (volitelné)</label>
+                            <div class="mb-4 border-bottom pb-4">
+                                <label class="form-label fw-bold">Hlavní obrázek (náhled)</label>
                                 <input type="file" name="image" class="form-control mb-2">
                                 <div class="small text-muted">
                                     Aktuální náhled:<br>
                                     <img src="{{ object.thumbnail.url }}" class="img-thumbnail mt-2"
-                                         style="max-height: 150px;">
+                                         style="max-height: 120px;">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold d-block mb-3">Správa galerie (další fotky)</label>
+
+                                {% if object.additional_images.exists %}
+                                <div class="row row-cols-3 row-cols-md-4 g-2 mb-3">
+                                    {% for extra in object.additional_images.all %}
+                                    <div class="col position-relative">
+                                        <img src="{{ extra.image.url }}" class="img-thumbnail object-fit-cover w-100" style="height: 100px;">
+                                        <button type="submit"
+                                                formaction="{% url 'delete_extra_image' extra.id %}"
+                                                class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 py-0 px-1 shadow-sm"
+                                                onclick="return confirm('Smazat tuto fotku z galerie?')">
+                                            <i class="bi bi-x-lg" style="font-size: 0.7rem;"></i>
+                                        </button>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <p class="text-muted small">V galerii zatím nejsou žádné další fotky.</p>
+                                {% endif %}
+
+                                <div class="bg-light p-3 border rounded">
+                                    <label class="form-label small fw-bold">Přidat další fotky do galerie:</label>
+                                    <input type="file" name="extra_images" class="form-control form-control-sm" multiple accept="image/*">
                                 </div>
                             </div>
 
@@ -57,5 +82,4 @@
             </div>
         </div>
     </div>
-
 {% endblock %}

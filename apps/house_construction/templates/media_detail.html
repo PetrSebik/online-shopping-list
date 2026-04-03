@@ -1,14 +1,13 @@
 {% extends "base_housing.html" %}
 
-{% block title %}Media{% endblock %}
+{% block title %}{{ image.title }} - Média{% endblock %}
 
 {% block content %}
 
     <div class="container mb-5">
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'media_list' %}" class="text-decoration-none">Média</a>
-                </li>
+                <li class="breadcrumb-item"><a href="{% url 'media_list' %}" class="text-decoration-none">Média</a></li>
                 <li class="breadcrumb-item active" aria-current="page">{{ image.title }}</li>
             </ol>
         </nav>
@@ -17,11 +16,55 @@
             <div class="col-lg-10">
                 <div class="card shadow-sm border-0 overflow-hidden">
 
-                    <div class="bg-dark text-center py-2">
-                        <img src="{{ image.image.url }}"
-                             class="img-fluid rounded"
-                             alt="{{ image.title }}"
-                             style="max-height: 85vh; width: auto;">
+                    <div id="mediaCarousel" class="carousel slide bg-black" data-bs-ride="false"
+                         style="border-bottom: 1px solid #333;">
+
+                        {% if image.additional_images.exists %}
+                            <div class="carousel-indicators">
+                                <button type="button" data-bs-target="#mediaCarousel" data-bs-slide-to="0"
+                                        class="active" aria-current="true"></button>
+                                {% for extra in image.additional_images.all %}
+                                    <button type="button" data-bs-target="#mediaCarousel"
+                                            data-bs-slide-to="{{ forloop.counter }}"></button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="carousel-inner" style="height: 600px; max-height: 80vh;">
+
+                            <div class="carousel-item active h-100">
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <img src="{{ image.image.url }}"
+                                         class="d-block mw-100 mh-100"
+                                         alt="{{ image.title }}"
+                                         style="object-fit: contain;">
+                                </div>
+                            </div>
+
+                            {% for extra in image.additional_images.all %}
+                                <div class="carousel-item h-100">
+                                    <div class="d-flex align-items-center justify-content-center h-100">
+                                        <img src="{{ extra.image.url }}"
+                                             class="d-block mw-100 mh-100"
+                                             alt="Další foto {{ forloop.counter }}"
+                                             style="object-fit: contain;">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if image.additional_images.exists %}
+                            <button class="carousel-control-prev" type="button" data-bs-target="#mediaCarousel"
+                                    data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Předchozí</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#mediaCarousel"
+                                    data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Další</span>
+                            </button>
+                        {% endif %}
                     </div>
 
                     <div class="card-body p-4">
@@ -30,18 +73,23 @@
                                 <h2 class="fw-bold mb-1">{{ image.title }}</h2>
                                 <p class="text-muted small">
                                     <i class="bi bi-calendar-event me-1"></i> {{ image.created_at|date:"d. F Y v H:i" }}
+                                    {% if image.additional_images.exists %}
+                                        <span class="ms-2 border-start ps-2">
+                                            <i class="bi bi-images me-1"></i> {{ image.additional_images.count|add:1 }} média
+                                        </span>
+                                    {% endif %}
                                 </p>
                             </div>
                             {% if image.hide %}
                                 <span class="badge bg-warning text-dark fs-6">
-                                <i class="bi bi-eye-slash-fill me-1"></i> SKRYTO
-                            </span>
+                                    <i class="bi bi-eye-slash-fill me-1"></i> SKRYTO
+                                </span>
                             {% endif %}
                         </div>
 
                         {% if image.description %}
-                            <div class="description-box p-3 bg-light rounded border-start border-4 border-primary">
-                                <p class="mb-0 text-dark">{{ image.description|linebreaks }}</p>
+                            <div class="description-box p-3 bg-light rounded border-start border-4 border-primary shadow-sm mb-4">
+                                <p class="mb-0 text-dark" style="white-space: pre-line;">{{ image.description }}</p>
                             </div>
                         {% endif %}
 
@@ -53,8 +101,8 @@
                             </a>
 
                             {% if user.is_authenticated %}
-                                <div class="btn-group">
-                                    <a href="{% url 'media_edit' image.id %}" class="btn btn-primary">
+                                <div class="btn-group shadow-sm">
+                                    <a href="{% url 'media_edit' image.id %}" class="btn btn-primary px-4">
                                         <i class="bi bi-pencil-square me-1"></i> Upravit
                                     </a>
                                     <form method="post" action="{% url 'media_delete' image.id %}"

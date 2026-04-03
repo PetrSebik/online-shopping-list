@@ -83,3 +83,15 @@ class ProjectImage(models.Model):
         self.thumbnail.save(
             f"thumb_{name}", ContentFile(thumb_io.getvalue()), save=False
         )
+
+class AdditionalImage(models.Model):
+    project_image = models.ForeignKey(
+        ProjectImage,
+        related_name="additional_images",
+        on_delete=models.CASCADE
+    )
+    image = models.ImageField(upload_to="gallery/extra/")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Extra pro {self.project_image.title}"
