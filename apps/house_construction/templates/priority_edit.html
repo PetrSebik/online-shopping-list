@@ -3,46 +3,82 @@
 {% block title %}Upravit prioritu{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-success text-white py-3">
-                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Upravit položku priorit</h5>
-            </div>
-            <div class="card-body p-4">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Název priority</label>
-                        {{ form.task_name }}
-                    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Upravit položku priorit</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Priorita</label>
-                        {{ form.priority_level }}
-                    </div>
+                        <div class="mb-3">
+                            <label for="id_task_name" class="form-label fw-bold">Název priority</label>
+                            <input type="text" name="task_name" id="id_task_name" class="form-control"
+                                   value="{{ form.task_name.value|default:'' }}" required>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Popis</label>
-                        {{ form.description }}
-                    </div>
+                        <div class="mb-3">
+                            <label for="id_priority_level" class="form-label fw-bold">Priorita</label>
+                            <input type="number" name="priority_level" id="id_priority_level" class="form-control"
+                                   value="{{ form.priority_level.value|default:5 }}">
+                        </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Příloha</label>
-                        {{ form.attachment }}
-                        {% if form.instance.attachment %}
-                            <div class="mt-2 small">Aktuální: <a href="{{ form.instance.attachment.url }}" target="_blank">{{ form.instance.attachment.name }}</a></div>
-                        {% endif %}
-                    </div>
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label fw-bold">Popis</label>
+                            <textarea name="description" id="id_description" class="form-control"
+                                      rows="3">{{ form.description.value|default:'' }}</textarea>
+                        </div>
 
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'priority_list' %}" class="btn btn-light border">Zpět</a>
-                        <button type="submit" class="btn btn-success px-4 shadow-sm">Uložit změny</button>
-                    </div>
-                </form>
+                        <div class="mb-4 p-3 bg-light border rounded">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="hide"
+                                       id="id_hide"
+                                       {% if form.hide.value %}checked{% endif %}>
+                                <label class="form-check-label fw-bold" for="id_hide">
+                                    Skrýt tuto položku
+                                </label>
+                            </div>
+                            <div class="form-text mt-1">
+                                Zapnutím položku zneviditelníte pro běžné uživatele.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="id_attachment" class="form-label fw-bold">Příloha</label>
+                            <input type="file" name="attachment" id="id_attachment" class="form-control">
+
+                            {% if form.instance.attachment %}
+                                <div class="mt-2 p-2 border rounded bg-light">
+                                    <div class="d-flex align-items-center justify-content-between">
+                <span class="small text-muted">
+                    <i class="bi bi-file-earmark-check"></i> Aktuální:
+                    <a href="{{ form.instance.attachment.url }}" target="_blank" class="text-decoration-none">
+                        {{ form.instance.attachment.name|truncatechars:30 }}
+                    </a>
+                </span>
+
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input border-danger" type="checkbox"
+                                                   name="attachment-clear" id="attachment-clear_id">
+                                            <label class="form-check-label small text-danger fw-bold"
+                                                   for="attachment-clear_id">
+                                                Smazat soubor
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-2">
+                            <a href="{% url 'priority_list' %}" class="btn btn-light border">Zpět</a>
+                            <button type="submit" class="btn btn-success px-4 shadow-sm">Uložit změny</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

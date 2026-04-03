@@ -10,6 +10,7 @@ class PriorityItem(models.Model):
     priority_level = models.PositiveIntegerField(default=5)
     attachment = models.FileField(upload_to="construction_docs/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    hide = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-priority_level", "task_name"]

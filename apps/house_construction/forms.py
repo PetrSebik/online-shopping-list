@@ -1,19 +1,24 @@
 from django import forms
 from .models import ConstructionQA, PriorityItem
 
+
 class ConstructionQAForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Apply Bootstrap classes to all fields
         for field in self.fields.values():
-            field.widget.attrs.update({'class': 'form-control'})
+            field.widget.attrs.update({"class": "form-control"})
 
     class Meta:
         model = ConstructionQA
-        fields = ['question', 'answer']
+        fields = ["question", "answer"]
         widgets = {
-            'question': forms.TextInput(attrs={'placeholder': 'Zadejte vaši otázku...'}),
-            'answer': forms.Textarea(attrs={'placeholder': 'Zde dopište odpověď...', 'rows': 4}),
+            "question": forms.TextInput(
+                attrs={"placeholder": "Zadejte vaši otázku..."}
+            ),
+            "answer": forms.Textarea(
+                attrs={"placeholder": "Zde dopište odpověď...", "rows": 4}
+            ),
         }
 
 
@@ -21,8 +26,11 @@ class PriorityItemForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs.update({'class': 'form-control'})
+            field.widget.attrs.update({"class": "form-control"})
 
     class Meta:
         model = PriorityItem
-        fields = ['task_name', 'description', 'priority_level', 'attachment']
+        fields = ["task_name", "description", "priority_level", "attachment", "hide"]
+        widgets = {
+            "hide": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }

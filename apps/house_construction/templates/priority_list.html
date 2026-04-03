@@ -4,7 +4,6 @@
 
 {% block extra_head %}
     <style>
-        /* Styly pro čistší vzhled řádku a decentní hover efekt */
         .priority-row {
             cursor: pointer;
             transition: background-color 0.2s ease-in-out;
@@ -14,7 +13,6 @@
             background-color: #f8f9fa; /* Velmi světlý šedý hover */
         }
 
-        /* Definice barevných proužků pro různé úrovně priorit */
         .priority-strip {
             width: 6px; /* Šířka proužku */
             height: 100%; /* Plná výška řádku */
@@ -82,19 +80,16 @@
         .priority-badge-custom {
             background-color: var(--prio-color);
             color: white;
-            /* Ensure text is readable on yellow (prio 5) */
             color: #fff;
             text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
         }
 
-        /* Special case for yellow/light colors to keep text readable */
         .prio-5 .priority-badge-custom,
         .prio-6 .priority-badge-custom {
             color: #212529;
             text-shadow: none;
         }
 
-        /* Zarovnání pro badge s číslem priority */
         .priority-badge-container {
             width: 50px;
             text-align: center;
@@ -239,6 +234,15 @@
                             <label for="description" class="form-label fw-bold">Popis (volitelný)</label>
                             <textarea name="description" id="description" class="form-control" rows="3"
                                       placeholder="Podrobnosti, poznámky..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="hide" id="hide" role="switch">
+                                <label class="form-check-label fw-bold" for="hide">Skrýt položku</label>
+                            </div>
+                            <div class="form-text text-muted">
+                                Pokud zapnete, tato položka se běžným uživatelům nezobrazí (uvidí ji pouze přihlášený uživatel).
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-12 col-md-6">

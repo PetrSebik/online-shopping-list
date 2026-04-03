@@ -26,6 +26,15 @@ class PriorityListView(ListView):
         )
         return redirect("priority_list")
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Check if the user is logged in
+        if self.request.user.is_authenticated:
+            return queryset
+        else:
+            return queryset.filter(hide=False)
+
 
 class PriorityDeleteView(LoginRequiredMixin, DeleteView):
     model = PriorityItem
