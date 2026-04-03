@@ -134,6 +134,11 @@
                             </div>
 
                             <div class="flex-grow-1">
+                                {% if item.hide %}
+                                    <span class="badge bg-warning text-dark me-2">
+                                    <i class="bi bi-eye-slash-fill"></i>
+                                </span>
+                                {% endif %}
                                 <span class="fw-bold fs-5 text-dark">{{ item.task_name }}</span>
                                 <small class="text-muted ms-2 d-none d-md-inline">
                                     <i class="bi bi-chevron-down"></i>
@@ -241,7 +246,8 @@
                                 <label class="form-check-label fw-bold" for="hide">Skrýt položku</label>
                             </div>
                             <div class="form-text text-muted">
-                                Pokud zapnete, tato položka se běžným uživatelům nezobrazí (uvidí ji pouze přihlášený uživatel).
+                                Pokud zapnete, tato položka se běžným uživatelům nezobrazí (uvidí ji pouze přihlášený
+                                uživatel).
                             </div>
                         </div>
                         <div class="row">
