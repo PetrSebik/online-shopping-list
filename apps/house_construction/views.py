@@ -3,6 +3,12 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import DeleteView, UpdateView
 from django.urls import reverse_lazy
+from django.views.generic import DetailView
+from django.http import Http404
+from .models import ProjectImage
+from django.core.files.base import ContentFile
+from io import BytesIO
+from PIL import Image
 
 from .forms import ConstructionQAForm, PriorityItemForm
 from .models import PriorityItem, ConstructionQA
@@ -80,3 +86,87 @@ class QAUpdateView(LoginRequiredMixin, UpdateView):
     form_class = ConstructionQAForm
     template_name = "qa_edit.html"
     success_url = reverse_lazy("qa_list")
+
+
+class MediaListView(ListView):
+    model = ProjectImage
+    template_name = "media_list.html"
+    context_object_name = "images"
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.user.is_authenticated:
+            return queryset
+        return queryset.filter(hide=False)
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("login")
+
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        image_file = request.FILES.get("image")
+        is_hidden = request.POST.get("hide") == "on"
+
+        if image_file:
+            new_photo = ProjectImage(
+                title=title, description=description, image=image_file, hide=is_hidden
+            )
+
+            img = Image.open(image_file)
+            img.thumbnail((400, 300))
+
+            thumb_io = BytesIO()
+            format_ = img.format if img.format else "JPEG"
+            img.save(thumb_io, format=format_, quality=85)
+
+            thumb_filename = f"thumb_{image_file.name}"
+            new_photo.thumbnail.save(
+                thumb_filename, ContentFile(thumb_io.getvalue()), save=False
+            )
+
+            new_photo.save()
+
+        return redirect("media_list")
+
+
+class MediaDetailView(DetailView):
+    model = ProjectImage
+    template_name = "media_detail.html"
+    context_object_name = "image"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.hide and not self.request.user.is_authenticated:
+            raise Http404("Fotografie nebyla nalezena.")
+        return obj
+
+
+class MediaUpdateView(LoginRequiredMixin, UpdateView):
+    model = ProjectImage
+    fields = ["title", "description", "image", "hide"]
+    template_name = "media_edit.html"
+    success_url = reverse_lazy("media_list")
+
+    def form_valid(self, form):
+        if "image" in form.changed_data:
+            image_file = form.cleaned_data["image"]
+            img = Image.open(image_file)
+            img.thumbnail((400, 300))
+
+            thumb_io = BytesIO()
+            format = img.format if img.format else "JPEG"
+            img.save(thumb_io, format=format, quality=85)
+
+            thumb_filename = f"thumb_{image_file.name}"
+            self.object.thumbnail.save(
+                thumb_filename, ContentFile(thumb_io.getvalue()), save=False
+            )
+
+        return super().form_valid(form)
+
+
+class MediaDeleteView(LoginRequiredMixin, DeleteView):
+    model = ProjectImage
+    success_url = reverse_lazy("media_list")

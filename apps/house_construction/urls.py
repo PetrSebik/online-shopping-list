@@ -6,6 +6,10 @@ from .views import (
     QADeleteView,
     QAUpdateView,
     PriorityUpdateView,
+    MediaListView,
+    MediaUpdateView,
+    MediaDetailView,
+    MediaDeleteView,
 )
 
 urlpatterns = [
@@ -21,4 +25,8 @@ urlpatterns = [
     path("questions/", QAListView.as_view(), name="qa_list"),
     path("questions/<int:pk>/delete/", QADeleteView.as_view(), name="qa_delete"),
     path("questions/<int:pk>/edit/", QAUpdateView.as_view(), name="qa_edit"),
+    path("media/", MediaListView.as_view(), name="media_list"),
+    path("media/<int:pk>/", MediaDetailView.as_view(), name="media_detail"),
+    path("media/<int:pk>/edit/", MediaUpdateView.as_view(), name="media_edit"),
+    path("media/<int:pk>/delete/", MediaDeleteView.as_view(), name="media_delete"),
 ]

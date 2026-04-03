@@ -1,0 +1,77 @@
+{% extends "base_housing.html" %}
+
+{% block title %}Media{% endblock %}
+
+{% block content %}
+
+    <div class="container mb-5">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'media_list' %}" class="text-decoration-none">Média</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ image.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow-sm border-0 overflow-hidden">
+
+                    <div class="bg-dark text-center py-2">
+                        <img src="{{ image.image.url }}"
+                             class="img-fluid rounded"
+                             alt="{{ image.title }}"
+                             style="max-height: 85vh; width: auto;">
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h2 class="fw-bold mb-1">{{ image.title }}</h2>
+                                <p class="text-muted small">
+                                    <i class="bi bi-calendar-event me-1"></i> {{ image.created_at|date:"d. F Y v H:i" }}
+                                </p>
+                            </div>
+                            {% if image.hide %}
+                                <span class="badge bg-warning text-dark fs-6">
+                                <i class="bi bi-eye-slash-fill me-1"></i> SKRYTO
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        {% if image.description %}
+                            <div class="description-box p-3 bg-light rounded border-start border-4 border-primary">
+                                <p class="mb-0 text-dark">{{ image.description|linebreaks }}</p>
+                            </div>
+                        {% endif %}
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'media_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Zpět na média
+                            </a>
+
+                            {% if user.is_authenticated %}
+                                <div class="btn-group">
+                                    <a href="{% url 'media_edit' image.id %}" class="btn btn-primary">
+                                        <i class="bi bi-pencil-square me-1"></i> Upravit
+                                    </a>
+                                    <form method="post" action="{% url 'media_delete' image.id %}"
+                                          onsubmit="return confirm('Opravdu chcete toto média smazat?');"
+                                          class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

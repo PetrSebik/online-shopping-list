@@ -2,6 +2,9 @@ import os
 from django.db import models
 from django.db.models.signals import post_delete, pre_save
 from django.dispatch import receiver
+from django.core.files.base import ContentFile
+from PIL import Image
+from io import BytesIO
 
 
 class PriorityItem(models.Model):
@@ -53,3 +56,30 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
     if not old_file == new_file:
         if old_file and os.path.isfile(old_file.path):
             os.remove(old_file.path)
+
+
+class ProjectImage(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to="gallery/full/")
+    thumbnail = models.ImageField(
+        upload_to="gallery/thumbs/", editable=False, null=True
+    )
+    hide = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.thumbnail:
+            self.create_thumbnail()
+
+        super().save(*args, **kwargs)
+
+    def create_thumbnail(self):
+        img = Image.open(self.image)
+        img.thumbnail((400, 300))
+        thumb_io = BytesIO()
+        img.save(thumb_io, img.format, quality=85)
+        name = os.path.basename(self.image.name)
+        self.thumbnail.save(
+            f"thumb_{name}", ContentFile(thumb_io.getvalue()), save=False
+        )
