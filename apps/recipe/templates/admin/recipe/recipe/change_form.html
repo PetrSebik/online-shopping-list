@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+  {% if original %}
+  <li>
+    <a href="{% url 'admin:recipe_recipe_import' %}?recipe={{ original.pk }}" class="viewsitelink">
+      {% trans "Upravit v JSON" %}
+    </a>
+  </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

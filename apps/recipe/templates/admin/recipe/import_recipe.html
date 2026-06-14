@@ -1,0 +1,174 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+{% if messages %}
+<ul class="messagelist">
+  {% for message in messages %}
+  <li class="{{ message.tags }}">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<style>
+  .import-section {
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .import-section h2 {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--primary);
+    color: var(--header-link-color, #fff);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .import-section-body {
+    padding: 16px;
+    background: var(--darkened-bg);
+  }
+  .import-hint {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    color: var(--body-quiet-color);
+  }
+  .schema-wrapper {
+    position: relative;
+  }
+  #copyBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 10px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    background: var(--primary);
+    color: var(--header-link-color, #fff);
+    border: none;
+    border-radius: 3px;
+  }
+  #copyBtn:hover { opacity: 0.85; }
+  #schema {
+    margin: 0;
+    padding: 12px;
+    padding-right: 90px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    background: var(--body-bg);
+    color: var(--body-fg);
+    border: 1px solid var(--hairline-color, var(--border-color));
+    border-radius: 3px;
+  }
+  .recipe-selector {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+.recipe-selector button {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background: var(--primary);
+    color: var(--header-link-color, #fff);
+    border: none;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .recipe-selector button:hover { opacity: 0.85; }
+  #json_data {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: 0.8rem;
+    padding: 10px;
+    background: var(--body-bg);
+    color: var(--body-fg);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    resize: vertical;
+  }
+  .import-actions {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .import-mode-label {
+    font-size: 0.82rem;
+    color: var(--body-quiet-color);
+  }
+  .import-mode-label strong {
+    color: var(--body-fg);
+  }
+</style>
+
+<div class="import-section">
+  <h2>Vybrat existující recept</h2>
+  <div class="import-section-body">
+    <p class="import-hint">Vyber recept pro úpravu — JSON se předvyplní do pole níže. Pro nový recept nech prázdné.</p>
+    <datalist id="recipeList">
+      {% for r in all_recipes %}
+      <option data-pk="{{ r.pk }}" value="{{ r.name }}"></option>
+      {% endfor %}
+    </datalist>
+    <div class="recipe-selector">
+      <input id="recipeSearch" type="text" list="recipeList" autocomplete="off"
+        placeholder="Začni psát název receptu…"
+        value="{{ selected_recipe.name|default:'' }}"
+        style="flex:1; padding:6px 8px; font-size:0.85rem; background:var(--body-bg); color:var(--body-fg); border:1px solid var(--border-color); border-radius:3px;">
+      <button type="button" onclick="
+        var input = document.getElementById('recipeSearch').value.trim();
+        var opts = document.getElementById('recipeList').options;
+        var pk = '';
+        for (var i = 0; i < opts.length; i++) {
+          if (opts[i].value === input) { pk = opts[i].dataset.pk; break; }
+        }
+        window.location.href = pk ? '?recipe=' + pk : '?';
+      ">Načíst</button>
+    </div>
+  </div>
+</div>
+
+<div class="import-section">
+  <h2>JSON Schema</h2>
+  <div class="import-section-body">
+    <p class="import-hint">
+      Zkopíruj toto schéma a pošli ho AI agentovi spolu s receptem.
+      Výčet <code>tags</code> odpovídá tagům aktuálně uloženým v databázi.
+    </p>
+    <div class="schema-wrapper">
+      <button id="copyBtn" type="button"
+        onclick="navigator.clipboard.writeText(document.getElementById('schema').textContent).then(() => { this.textContent = 'Zkopírováno!'; setTimeout(() => this.textContent = 'Kopírovat', 1500); })">
+        Kopírovat
+      </button>
+      <pre id="schema">{{ schema_json }}</pre>
+    </div>
+  </div>
+</div>
+
+<div class="import-section">
+  <h2>{% if selected_recipe %}Upravit recept{% else %}Importovat recept{% endif %}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% if selected_recipe %}<input type="hidden" name="recipe_id" value="{{ selected_recipe.pk }}">{% endif %}
+    <div class="import-section-body">
+      <p class="import-hint">Vlož JSON vrácený AI agentem a klikni na uložit.</p>
+      <textarea id="json_data" name="json_data" rows="20"
+        placeholder='{ "name": "...", "ingredients": [...], "steps": [...] }'>{{ json_data }}</textarea>
+      <div class="import-actions">
+        <input type="submit" value="{% if selected_recipe %}Uložit recept{% else %}Importovat recept{% endif %}" class="default">
+        {% if selected_recipe %}
+        <span class="import-mode-label">Upravuje se: <strong>{{ selected_recipe.name }}</strong></span>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
