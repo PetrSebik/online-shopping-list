@@ -149,6 +149,22 @@ STATIC_ROOT = os.path.join(ROOT_DIR, 'static')
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    # In production, hash static filenames (recipe.<hash>.css) so browsers
+    # always fetch fresh CSS/JS after a deploy — no manual cache refresh.
+    # In DEBUG we keep plain storage, since runserver dev doesn't run collectstatic.
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "conf.storage.ForgivingManifestStaticFilesStorage"
+        ),
+    },
+}
+
 INTERNAL_IPS = [
     "127.0.0.1",
 ]

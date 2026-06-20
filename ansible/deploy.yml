@@ -38,16 +38,17 @@
         chdir: "{{ project_dir }}"
         creates: "{{ project_dir }}/Pipfile.lock"
 
-#    - name: Run migrations
-#      command: pipenv run python manage.py migrate
-#      args:
-#        chdir: "{{ project_dir }}"
-#      notify: Restart Gunicorn
-#
-#    - name: Collect static files
-#      command: pipenv run python manage.py collectstatic --noinput
-#      args:
-#        chdir: "{{ project_dir }}"
+    - name: Run migrations
+      command: pipenv run python manage.py migrate
+      args:
+        chdir: "{{ project_dir }}"
+      notify: Restart Gunicorn
+
+    - name: Collect static files
+      command: pipenv run python manage.py collectstatic --noinput
+      args:
+        chdir: "{{ project_dir }}"
+      notify: Restart Gunicorn
 
   handlers:
     - name: Restart Gunicorn
