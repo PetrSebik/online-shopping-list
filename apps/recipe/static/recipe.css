@@ -1,0 +1,273 @@
+/* ==========================================================================
+   Recipe section — "Kuchařka" cookbook identity.
+   Scoped under .recipe-app so the shopping app is untouched. Loaded only on
+   recipe pages, so :root tokens here don't leak elsewhere.
+   ========================================================================== */
+
+:root {
+    --rc-paper:   #F7F4ED;   /* warm linen background            */
+    --rc-paper-2: #EFEADD;   /* slightly deeper paper            */
+    --rc-surface: #FFFFFF;
+    --rc-ink:     #26211C;   /* warm near-black                  */
+    --rc-muted:   #8A8276;   /* warm grey                        */
+    --rc-line:    #E7E0D2;   /* hairline                         */
+    --rc-brand:   #2E5D45;   /* deep herb green                  */
+    --rc-brand-d: #21452F;
+    --rc-brand-soft: #E7EFE9;
+    --rc-accent:  #D9942F;   /* warm amber                       */
+
+    /* freshness scale */
+    --rc-fresh:  #3F9D6B;
+    --rc-recent: #86A33C;
+    --rc-aging:  #D9942F;
+    --rc-stale:  #C2683B;
+    --rc-never:  #C2BBAD;
+}
+
+/* ---- shell: only on recipe pages, restyle body + top bar -------------- */
+body:has(.recipe-app) { background: var(--rc-paper); }
+/* Full-height flex layout: top bar + scrolling content fill exactly one screen
+   (no bottom gap from the old height:90vh hack). */
+.content:has(.recipe-app) {
+    background: var(--rc-paper);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+.content:has(.recipe-app) .recipe-app {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+.content:has(.recipe-app) .h-90-overflow {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+.content:has(.recipe-app) .navbar {
+    background: var(--rc-paper) !important;
+    border-bottom: 1px solid var(--rc-line);
+}
+.content:has(.recipe-app) .navbar .btn-outline-success {
+    color: var(--rc-brand); border-color: var(--rc-brand);
+}
+
+/* ---- base typography --------------------------------------------------- */
+.recipe-app {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color: var(--rc-ink);
+    -webkit-font-smoothing: antialiased;
+}
+.recipe-app h1, .recipe-app h2, .recipe-app h3,
+.recipe-app .display-face {
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    letter-spacing: -0.015em;
+}
+.recipe-shell { max-width: 1040px; margin: 0 auto; }
+
+/* ---- page header ------------------------------------------------------- */
+.rc-header { margin-bottom: 1.4rem; }
+.rc-eyebrow {
+    text-transform: uppercase; letter-spacing: 0.18em;
+    font-size: 0.72rem; font-weight: 600; color: var(--rc-brand);
+    margin-bottom: 0.15rem;
+}
+.rc-title { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 700; line-height: 1.02; margin: 0; }
+.rc-sub { color: var(--rc-muted); margin: 0.3rem 0 0; }
+
+.rc-new-btn {
+    background: var(--rc-brand); color: #fff; border: 0; border-radius: 12px;
+    font-weight: 600; padding: 0.6rem 1.05rem; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;
+    transition: background 0.15s, transform 0.15s;
+}
+.rc-new-btn:hover { background: var(--rc-brand-d); color: #fff; transform: translateY(-1px); }
+
+/* ---- toolbar: search + sort + tag chips -------------------------------- */
+.rc-toolbar { margin-bottom: 1.1rem; }
+
+.rc-search {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: var(--rc-surface); border: 1px solid var(--rc-line);
+    border-radius: 14px; padding: 0.1rem 0.9rem;
+    transition: border-color 0.15s, box-shadow 0.15s; flex: 1 1 260px;
+}
+.rc-search:focus-within { border-color: var(--rc-brand); box-shadow: 0 0 0 4px rgba(46, 93, 69, 0.12); }
+.rc-search .bi { color: var(--rc-muted); font-size: 1.05rem; }
+.rc-search input {
+    border: 0; outline: 0; background: transparent; width: 100%;
+    padding: 0.7rem 0; font-size: 1.02rem; color: var(--rc-ink);
+}
+.rc-search input::placeholder { color: var(--rc-muted); }
+
+.rc-select {
+    border: 1px solid var(--rc-line); background: var(--rc-surface); color: var(--rc-ink);
+    border-radius: 14px; padding: 0.7rem 2.2rem 0.7rem 0.95rem; font-size: 0.95rem;
+    appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238A8276' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.85rem center;
+}
+.rc-select:focus { outline: 0; border-color: var(--rc-brand); box-shadow: 0 0 0 4px rgba(46, 93, 69, 0.12); }
+
+.rc-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.85rem; }
+.rc-chip {
+    border: 1px solid var(--rc-line); color: var(--rc-ink); background: var(--rc-surface);
+    border-radius: 999px; padding: 0.34rem 0.85rem; font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; transition: border-color 0.12s, transform 0.12s; user-select: none;
+}
+.rc-chip:hover { border-color: var(--rc-brand); }
+.btn-check:checked + .rc-chip {
+    background: var(--tag-color); color: var(--tag-text);
+    border-color: var(--tag-color); box-shadow: 0 2px 7px rgba(0, 0, 0, 0.14);
+}
+
+/* ---- results meta ------------------------------------------------------ */
+.rc-meta { color: var(--rc-muted); font-size: 0.85rem; margin: 0.2rem 0 0.9rem; }
+
+/* ---- recipe card (list) ----------------------------------------------- */
+.rc-card {
+    position: relative; display: block; background: var(--rc-surface);
+    border: 1px solid var(--rc-line);
+    border-left: 5px solid var(--rail, var(--rc-line));
+    border-radius: 14px;
+    padding: 1.05rem 1.2rem; margin-bottom: 0.7rem;
+    transition: box-shadow 0.16s ease, transform 0.16s ease;
+}
+.rc-card:hover { box-shadow: 0 12px 26px rgba(38, 33, 28, 0.09); transform: translateY(-2px); }
+.rc-card.fresh  { --rail: var(--rc-fresh); }
+.rc-card.recent { --rail: var(--rc-recent); }
+.rc-card.aging  { --rail: var(--rc-aging); }
+.rc-card.stale  { --rail: var(--rc-stale); }
+.rc-card.never  { --rail: var(--rc-never); }
+
+.rc-card-row { display: flex; gap: 1rem; align-items: flex-start; justify-content: space-between; }
+.rc-card-main { min-width: 0; }
+.rc-name {
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 1.28rem; font-weight: 600; line-height: 1.15;
+    color: var(--rc-ink); text-decoration: none; letter-spacing: -0.01em;
+}
+/* Stretched link: the whole card navigates to the detail page. */
+.rc-name::after { content: ""; position: absolute; inset: 0; z-index: 0; }
+.rc-card:hover .rc-name { color: var(--rc-brand); }
+.rc-desc { color: var(--rc-muted); font-size: 0.9rem; margin: 0.25rem 0 0; }
+
+.rc-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.6rem; }
+.rc-tag {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em;
+    padding: 0.28em 0.7em; border-radius: 999px; line-height: 1.4; white-space: nowrap;
+}
+
+/* z-index keeps the cook control clickable above the card's stretched link. */
+.rc-aside { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 0.45rem; position: relative; z-index: 1; }
+
+/* ---- cooked control (recency + date picker) --------------------------- */
+.rc-cooked { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+.rc-recency { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.84rem; color: var(--rc-muted); white-space: nowrap; }
+.rc-recency .dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--rc, var(--rc-never)); flex: none; }
+.rc-cooked.fresh  { --rc: var(--rc-fresh); }
+.rc-cooked.recent { --rc: var(--rc-recent); }
+.rc-cooked.aging  { --rc: var(--rc-aging); }
+.rc-cooked.stale  { --rc: var(--rc-stale); }
+.rc-cooked.never  { --rc: var(--rc-never); }
+.rc-cooked.never .rc-recency { font-style: italic; }
+
+.rc-cook-details { position: relative; }
+.rc-cook-details > summary { list-style: none; }
+.rc-cook-details > summary::-webkit-details-marker { display: none; }
+.rc-cook-btn {
+    background: var(--rc-brand-soft); color: var(--rc-brand-d); border: 0;
+    border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+    padding: 0.32rem 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;
+    transition: background 0.13s, color 0.13s; white-space: nowrap;
+}
+.rc-cook-btn:hover { background: var(--rc-brand); color: #fff; }
+.rc-cook-details[open] > .rc-cook-btn { background: var(--rc-brand); color: #fff; }
+
+/* Inline panel (in normal flow) — expands the card, never hidden behind siblings. */
+.rc-pop {
+    margin-top: 0.5rem; background: var(--rc-surface); text-align: left;
+    border: 1px solid var(--rc-line); border-radius: 14px; padding: 0.9rem;
+    box-shadow: 0 8px 24px rgba(38, 33, 28, 0.10); width: 240px; max-width: 75vw;
+}
+.rc-pop label { font-size: 0.78rem; font-weight: 600; color: var(--rc-ink); display: block; margin-bottom: 0.3rem; }
+.rc-pop input[type="date"] {
+    width: 100%; border: 1px solid var(--rc-line); border-radius: 10px;
+    padding: 0.45rem 0.6rem; font-size: 0.92rem; margin-bottom: 0.6rem; color: var(--rc-ink);
+}
+.rc-pop input[type="date"]:focus { outline: 0; border-color: var(--rc-brand); box-shadow: 0 0 0 3px rgba(46, 93, 69, 0.12); }
+.rc-pop-actions { display: flex; gap: 0.5rem; }
+.rc-save {
+    flex: 1; background: var(--rc-brand); color: #fff; border: 0; border-radius: 10px;
+    padding: 0.45rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+}
+.rc-save:hover { background: var(--rc-brand-d); }
+.rc-clear {
+    background: #fff; color: var(--rc-stale); border: 1px solid var(--rc-line);
+    border-radius: 10px; padding: 0.45rem 0.6rem; cursor: pointer;
+}
+.rc-clear:hover { background: #faf1ec; border-color: var(--rc-stale); }
+
+/* ---- empty state ------------------------------------------------------- */
+.rc-empty {
+    text-align: center; color: var(--rc-muted); padding: 3.5rem 1rem;
+    border: 1px dashed var(--rc-line); border-radius: 16px; background: var(--rc-surface);
+}
+.rc-empty .bi { font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.6; }
+
+/* ---- detail page ------------------------------------------------------- */
+.rc-back {
+    display: inline-flex; align-items: center; gap: 0.35rem; color: var(--rc-muted);
+    text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.9rem;
+}
+.rc-back:hover { color: var(--rc-brand); }
+
+.rc-detail-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.6rem;
+}
+.rc-detail-title { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 700; line-height: 1.02; margin: 0 0 0.5rem; }
+.rc-detail-desc { color: var(--rc-muted); margin: 0 0 0.7rem; max-width: 52ch; }
+
+.rc-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+@media (min-width: 992px) {
+    .rc-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
+    .rc-ingredients { position: sticky; top: 1rem; }
+}
+
+.rc-section { background: var(--rc-surface); border: 1px solid var(--rc-line); border-radius: 18px; overflow: hidden; }
+.rc-section-head {
+    display: flex; align-items: center; gap: 0.55rem; padding: 0.95rem 1.2rem;
+    border-bottom: 1px solid var(--rc-line); font-size: 1.05rem; font-weight: 600;
+}
+.rc-section-head .bi { color: var(--rc-brand); }
+
+.rc-ing { display: flex; justify-content: space-between; gap: 1rem; padding: 0.7rem 1.2rem; border-bottom: 1px solid var(--rc-line); }
+.rc-ing:last-child { border-bottom: 0; }
+.rc-ing-name { font-weight: 600; }
+.rc-ing-desc { color: var(--rc-muted); font-size: 0.84rem; margin-top: 0.1rem; }
+.rc-ing-amt { color: var(--rc-brand); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.rc-step { display: flex; gap: 1rem; padding: 1.05rem 1.2rem; border-bottom: 1px solid var(--rc-line); }
+.rc-step:last-child { border-bottom: 0; }
+.rc-step-num {
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif; font-size: 1.55rem;
+    font-weight: 700; color: var(--rc-brand); line-height: 1; min-width: 1.7rem; flex: none;
+}
+.rc-step p { margin: 0; line-height: 1.55; }
+.rc-section-empty { padding: 1.1rem 1.2rem; color: var(--rc-muted); }
+
+/* ---- responsive -------------------------------------------------------- */
+@media (max-width: 575px) {
+    .rc-card-row { flex-direction: column; }
+    .rc-aside { align-items: flex-start; width: 100%; }
+    .rc-cooked { align-items: flex-start; }
+    .rc-desc { display: none; }  /* keep mobile cards compact */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rc-card, .rc-new-btn { transition: none; }
+    .rc-card:hover, .rc-new-btn:hover { transform: none; }
+}

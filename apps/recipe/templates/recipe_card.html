@@ -1,0 +1,25 @@
+{% load recipe_extras %}
+<div class="rc-card{% if user.is_authenticated %} {{ recipe.last_cooked_date|cooked_freshness }}{% endif %}" id="recipe-{{ recipe.id }}">
+    <div class="rc-card-row">
+        <div class="rc-card-main">
+            <a href="{% url 'recipe_detail' recipe.id %}" class="rc-name">{{ recipe.name|default_if_none:"—" }}</a>
+            {% if recipe.description %}
+                <p class="rc-desc">{{ recipe.description }}</p>
+            {% endif %}
+            {% if recipe.tags.all %}
+                <div class="rc-tags">
+                    {% for tag in recipe.tags.all %}
+                        <span class="rc-tag" style="background-color: {{ tag.color }}; color: {{ tag.text_color }};">
+                            {{ tag.name }}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        {% if user.is_authenticated %}
+            <div class="rc-aside">
+                {% include 'recipe_cooked_control.html' %}
+            </div>
+        {% endif %}
+    </div>
+</div>

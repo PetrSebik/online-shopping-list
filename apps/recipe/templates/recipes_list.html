@@ -1,10 +1,65 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block custom_scrips %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'recipe.css' %}">
+{% endblock %}
 
 {% block body %}
-    <div class="container-fluid h-90-overflow p-3">
-        <div class="row mb-5">
-            {% include 'recipes_list_partial.html' %}
+    <div class="recipe-app">
+        <div class="h-90-overflow p-3 p-md-4">
+            <div class="recipe-shell">
+
+                <div class="rc-header">
+                    <div class="rc-eyebrow">Rodinná kuchařka</div>
+                    <h1 class="rc-title">Recepty</h1>
+                    <p class="rc-sub">Co dnes uvaříme?</p>
+                </div>
+
+                <form id="filter-form" class="rc-toolbar"
+                      hx-get="{% url 'recipes_list_filtered' %}"
+                      hx-target="#recipes-list"
+                      hx-swap="innerHTML"
+                      hx-trigger="change, keyup changed delay:300ms from:input[name=q], submit"
+                      onsubmit="return false">
+                    <div class="d-flex flex-wrap gap-2">
+                        <label class="rc-search">
+                            <i class="bi bi-search"></i>
+                            <input type="search" name="q" value="{{ query }}"
+                                   placeholder="Hledat podle názvu nebo suroviny…" autocomplete="off">
+                        </label>
+                        <select name="sort" class="rc-select">
+                            <option value="name"   {% if sort == 'name' %}selected{% endif %}>Název (A–Z)</option>
+                            {% if user.is_authenticated %}
+                                <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Naposledy vařeno</option>
+                                <option value="stale"  {% if sort == 'stale' %}selected{% endif %}>Nejdéle nevařeno</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    {% if all_tags %}
+                        <div class="rc-chips">
+                            {% for tag in all_tags %}
+                                <input type="checkbox" class="btn-check" name="tags" value="{{ tag.id }}"
+                                       id="tag-{{ tag.id }}" autocomplete="off"
+                                       {% if tag.id in active_tag_ids %}checked{% endif %}>
+                                <label class="rc-chip" for="tag-{{ tag.id }}"
+                                       style="--tag-color: {{ tag.color }}; --tag-text: {{ tag.text_color }};">
+                                    {{ tag.name }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </form>
+
+                <div id="recipes-list">
+                    {% include 'recipes_list_partial.html' %}
+                </div>
+
+            </div>
         </div>
     </div>
-
 {% endblock %}

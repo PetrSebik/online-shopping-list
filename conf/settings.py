@@ -91,7 +91,7 @@ TEMPLATES = [
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-    "django_components.finders.ComponentsFileSystemFinder",
+    "conf.finders.CompatComponentsFileSystemFinder",
 ]
 
 WSGI_APPLICATION = "conf.wsgi.application"

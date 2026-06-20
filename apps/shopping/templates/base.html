@@ -24,17 +24,35 @@
     {% endblock %}
 
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
 <div class="main-container d-flex">
     {% include "sidemenu.html" %}
     <div class="content">
-        <nav class="navbar navbar-expand-lg navbar-light bg-success-subtle py-0">
-            <div class="container-fluid">
-                <div class="d-flex justify-content-between align-items-center d-lg-none d-block">
-                    <button class="btn px-1 py-1 open-btn my-1" id="mobile-menu-open-btn">
-                        <span class="h3 mb-0 bi bi-list"></span>
-                    </button>
+        {# Top bar: hamburger (mobile only) on the left, auth on the right (all sizes). #}
+        <nav class="navbar bg-success-subtle py-0">
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+                <button class="btn px-1 py-1 open-btn my-1 d-lg-none" id="mobile-menu-open-btn">
+                    <span class="h3 mb-0 bi bi-list"></span>
+                </button>
+                <div class="py-1 ms-auto">
+                    {% if user.is_authenticated %}
+                        <span class="me-2 d-none d-sm-inline text-muted small">
+                            <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                        </span>
+                        <form method="post" action="{% url 'logout' %}" class="d-inline m-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-box-arrow-right me-1"></i>Odhlásit
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}"
+                           class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Přihlásit
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </nav>

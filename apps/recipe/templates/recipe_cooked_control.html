@@ -1,0 +1,33 @@
+{% load recipe_extras %}
+<div id="cooked-{{ recipe.id }}" class="rc-cooked {{ recipe.last_cooked_date|cooked_freshness }}">
+    <span class="rc-recency">
+        <span class="dot"></span>
+        <span>{{ recipe.last_cooked_date|cooked_since }}</span>
+    </span>
+
+    {% if user.is_authenticated %}
+        {# Native <details> so the picker expands inline — never hidden behind cards. #}
+        <details class="rc-cook-details">
+            <summary class="rc-cook-btn"><i class="bi bi-check2-circle"></i>Uvařeno</summary>
+            <div class="rc-pop">
+                <form hx-post="{% url 'recipe_cooked' recipe.id %}"
+                      hx-target="#cooked-{{ recipe.id }}" hx-swap="outerHTML">
+                    <label>Datum vaření</label>
+                    <input type="date" name="last_cooked_date"
+                           value="{% if recipe.last_cooked_date %}{{ recipe.last_cooked_date|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}">
+                    <div class="rc-pop-actions">
+                        <button type="submit" class="rc-save"><i class="bi bi-check-lg me-1"></i>Uložit</button>
+                        {% if recipe.last_cooked_date %}
+                            <button type="button" class="rc-clear" title="Vymazat datum"
+                                    hx-post="{% url 'recipe_cooked' recipe.id %}"
+                                    hx-vals='{"last_cooked_date": ""}'
+                                    hx-target="#cooked-{{ recipe.id }}" hx-swap="outerHTML">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </details>
+    {% endif %}
+</div>

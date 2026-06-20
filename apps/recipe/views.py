@@ -1,71 +1,116 @@
+import unicodedata
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import F
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
+from django.utils.dateparse import parse_date
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView
 
 from .forms import CreateRecipeForm, RecipeItemFormSet, RecipeStepFormSet
 from .models import Recipe, Tag
 
+# Available sort orders for the recipe list. "stale" surfaces recipes that
+# haven't been cooked in the longest time (never-cooked first) for meal planning.
+SORT_OPTIONS = {
+    "name": ["name"],
+    "recent": [F("last_cooked_date").desc(nulls_last=True), "name"],
+    "stale": [F("last_cooked_date").asc(nulls_first=True), "name"],
+}
+
+
+def _normalize(text):
+    """Lower-case and strip diacritics so "lečo" matches "leco" etc.
+
+    SQLite has no unaccent, but the recipe set is tiny, so we filter in Python.
+    """
+    decomposed = unicodedata.normalize("NFKD", text or "")
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).lower()
+
+
+def filter_recipes(request):
+    """Apply the search/tag/sort GET parameters to the recipe list.
+
+    Tags and sorting run in the DB; the (accent-insensitive) text search runs
+    in Python over name + ingredient names. Returns the resulting list plus the
+    parsed parameters so views can echo the filter state back to the controls.
+    """
+    qs = Recipe.objects.prefetch_related("tags", "items").distinct()
+
+    tag_ids = [int(t) for t in request.GET.getlist("tags") if t.isdigit()]
+    if tag_ids:
+        # OR logic: a recipe matches if it has ANY of the selected tags.
+        qs = qs.filter(tags__in=tag_ids)
+
+    sort = request.GET.get("sort", "name")
+    order = SORT_OPTIONS.get(sort, SORT_OPTIONS["name"])
+    recipes = list(qs.order_by(*order))
+
+    query = request.GET.get("q", "").strip()
+    if query:
+        needle = _normalize(query)
+        recipes = [
+            r for r in recipes
+            if needle in _normalize(r.name)
+            or any(needle in _normalize(i.name) for i in r.items.all())
+            or any(needle in _normalize(t.name) for t in r.tags.all())
+        ]
+
+    return recipes, tag_ids, query, sort
+
 
 class RecipesListView(ListView):
-    template_name = 'recipes_list.html'
-    queryset = Recipe.objects.prefetch_related('tags').all()
-    context_object_name = 'recipes'
+    template_name = "recipes_list.html"
+    context_object_name = "recipes"
+
+    def get_queryset(self):
+        return filter_recipes(self.request)[0]
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-
-        active_tag_ids = set()
-        all_tags = Tag.objects.all().order_by("name")
-        for t in all_tags:
-            t.is_active = True
-            active_tag_ids.add(t.id)
-
-        ctx["all_tags"] = all_tags
-        ctx["active_tag_ids"] = active_tag_ids
+        _, tag_ids, query, sort = filter_recipes(self.request)
+        ctx["all_tags"] = Tag.objects.order_by("name")
+        ctx["active_tag_ids"] = tag_ids
+        ctx["query"] = query
+        ctx["sort"] = sort
         return ctx
 
 
 class RecipesListFilteredView(ListView):
-    template_name = 'recipes_list_partial.html'
-    queryset = Recipe.objects.prefetch_related('tags').all()
-    context_object_name = 'recipes'
-
-    def get_tag_ids(self) -> list[int]:
-        """
-        Parse 'tags' GET parameter into a list of integers.
-        Ignores empty strings or invalid integers.
-        """
-        tags_param = self.request.GET.get('tags', '')
-        return [int(t.strip()) for t in tags_param.split(',') if t.strip().isdigit()]
+    """htmx endpoint that returns just the list of recipe cards."""
+    template_name = "recipes_list_partial.html"
+    context_object_name = "recipes"
 
     def get_queryset(self):
-        qs = Recipe.objects.prefetch_related('tags')
-        tag_ids = self.get_tag_ids()
-        if tag_ids:
-            qs = qs.filter(tags__in=tag_ids).distinct()
-        elif len(tag_ids) == 0:
-            qs = qs.none()
-        return qs
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-
-        active_tag_ids = self.get_tag_ids()
-        all_tags = Tag.objects.all().order_by("name")
-        for t in all_tags:
-            t.is_active = t.id in active_tag_ids
-
-        ctx["all_tags"] = all_tags
-        ctx["active_tag_ids"] = active_tag_ids
-        return ctx
+        return filter_recipes(self.request)[0]
 
 
 class RecipeDetailView(DetailView):
-    template_name = 'recipes_detail.html'
+    template_name = "recipes_detail.html"
     queryset = Recipe.objects.all()
-    context_object_name = 'recipe'
+    context_object_name = "recipe"
 
 
-class RecipeCreateView(CreateView):
+class RecipeCookedView(LoginRequiredMixin, View):
+    """Set (or clear) a recipe's last cooked date and return the updated control.
+
+    Signed-in only, since the site is public on the internet.
+    """
+
+    def post(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe.last_cooked_date = parse_date(request.POST.get("last_cooked_date", ""))
+        recipe.save(update_fields=["last_cooked_date"])
+        html = render_to_string(
+            "recipe_cooked_control.html", {"recipe": recipe}, request=request
+        )
+        return HttpResponse(html)
+
+
+class RecipeCreateView(LoginRequiredMixin, CreateView):
     template_name = 'recipe_create.html'
     queryset = Recipe.objects.all()
     context_object_name = 'recipe'

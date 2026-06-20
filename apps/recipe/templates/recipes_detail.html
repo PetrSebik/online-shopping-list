@@ -1,70 +1,77 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block custom_scrips %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'recipe.css' %}">
+{% endblock %}
 
 {% block body %}
+    <div class="recipe-app">
+        <div class="h-90-overflow p-3 p-md-4">
+            <div class="recipe-shell">
 
-    <div class="container-fluid p-3">
-        <h1 class="mx-3 mb-3">{{ recipe.name }}</h1>
-        <div class="card mb-3">
-            <div class="card-header">
-                <h3>Suroviny</h3>
-            </div>
-            <div class="card-body p-0">
-                <ul id="list-items" class="list-group">
-                    {% for item in recipe.items.all %}
-                        <li class="list-group-item">
-                            <div class="d-flex align-items-center">
-                                <div class="row">
-                                    <p class="mb-0">
-                                <span class="item-name">
-                                    {{ item.name }}
-                                </span>
-                                        {{ item.count|default_if_none:"" }} {{ item.units|default_if_none:"" }}
-                                    </p>
-                                </div>
-                            </div>
-                            {% if item.description %}
-                                <div class="mb-2 text-muted">{{ item.description }}</div>
-                            {% endif %}
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">
-                            Žadné suroviny nebyly zadány
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+                <a href="{% url 'recipes_list' %}" class="rc-back">
+                    <i class="bi bi-arrow-left"></i>Zpět na recepty
+                </a>
 
-        <div class="card mb-3">
-            <div class="card-header">
-                <h3>Postup</h3>
-            </div>
-            <div class="card-body p-0">
-                <ul id="list-items" class="list-group">
-                    {% for step in recipe.get_ordered_steps %}
-                        <li class="list-group-item">
-                            <div class="d-flex align-items-center">
-                                <div class="row">
-                                    <p class="mb-0">
-                                <span class="step-number">
-                                    {{ step.number }}
-                                </span>
-                                        {{ step.text }}
-                                    </p>
-                                </div>
+                <div class="rc-detail-head">
+                    <div>
+                        <h1 class="rc-detail-title">{{ recipe.name }}</h1>
+                        {% if recipe.description %}
+                            <p class="rc-detail-desc">{{ recipe.description }}</p>
+                        {% endif %}
+                        {% if recipe.tags.all %}
+                            <div class="rc-tags">
+                                {% for tag in recipe.tags.all %}
+                                    <span class="rc-tag" style="background-color: {{ tag.color }}; color: {{ tag.text_color }};">
+                                        {{ tag.name }}
+                                    </span>
+                                {% endfor %}
                             </div>
-                            {% if item.description %}
-                                <div class="mb-2 text-muted">{{ item.description }}</div>
-                            {% endif %}
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item">
-                            Žadný postup nebyl zadán
-                        </li>
-                    {% endfor %}
-                </ul>
+                        {% endif %}
+                    </div>
+                    {% if user.is_authenticated %}
+                        {% include 'recipe_cooked_control.html' %}
+                    {% endif %}
+                </div>
+
+                <div class="rc-grid">
+                    <div class="rc-section rc-ingredients">
+                        <div class="rc-section-head"><i class="bi bi-basket3"></i>Suroviny</div>
+                        {% for item in recipe.items.all %}
+                            <div class="rc-ing">
+                                <div>
+                                    <div class="rc-ing-name">{{ item.name }}</div>
+                                    {% if item.description %}
+                                        <div class="rc-ing-desc">{{ item.description }}</div>
+                                    {% endif %}
+                                </div>
+                                {% if item.count or item.units %}
+                                    <div class="rc-ing-amt">{{ item.count|default_if_none:"" }} {{ item.units|default_if_none:"" }}</div>
+                                {% endif %}
+                            </div>
+                        {% empty %}
+                            <div class="rc-section-empty">Žádné suroviny nebyly zadány</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="rc-section">
+                        <div class="rc-section-head"><i class="bi bi-list-ol"></i>Postup</div>
+                        {% for step in recipe.get_ordered_steps %}
+                            <div class="rc-step">
+                                <span class="rc-step-num">{{ step.number }}</span>
+                                <p>{{ step.text|linebreaksbr }}</p>
+                            </div>
+                        {% empty %}
+                            <div class="rc-section-empty">Žádný postup nebyl zadán</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-
 {% endblock %}
