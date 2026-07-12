@@ -35,6 +35,28 @@
                 Recipe List
             {% endfill %}
         {% endcomponent %}
+
+        {% if user.is_authenticated %}
+            {% component "menu_item" request=request redirect_to="priority_list" url_names="priority_list" %}
+                {% fill "label" %}
+                    House Construction
+                {% endfill %}
+            {% endcomponent %}
+
+            {% if clockify_settings_id %}
+                {% component "menu_item" request=request redirect_to="clockify-report" url_names="clockify-report" pk_kwarg=clockify_settings_id %}
+                    {% fill "label" %}
+                        Time Tracker
+                    {% endfill %}
+                {% endcomponent %}
+            {% endif %}
+
+            {% component "menu_item" request=request redirect_to="admin:index" %}
+                {% fill "label" %}
+                    Django Admin
+                {% endfill %}
+            {% endcomponent %}
+        {% endif %}
     </ul>
 
 
