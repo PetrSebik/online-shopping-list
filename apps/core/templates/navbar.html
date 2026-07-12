@@ -28,6 +28,13 @@
                         <i class="bi bi-images me-1"></i> Média
                     </a>
                 </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shopping_list' %}">
+                            <i class="bi bi-cart4 me-1"></i> Nákupní seznam
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
 
             <div class="navbar-nav align-items-lg-center">
