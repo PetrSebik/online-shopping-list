@@ -2,31 +2,241 @@
 {% load clockify_filters %}
 
 {% block body %}
-    <div class="container py-4">
-        <h2 class="mb-4">Clockify Monthly Summary</h2>
+    <div class="container-fluid py-3 px-3 clockify-page">
+        <div class="page-header mb-3">
+            <div class="page-eyebrow">Clockify Summary</div>
+            <div class="page-title">{{ month_label|default:"Monthly Summary" }}</div>
+        </div>
 
         {% if error %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
             </div>
         {% else %}
-            <div class="card">
-                <div class="card-body">
-                    <p>Working days passed: <strong>{{ working_days_passed }} / {{ total_working_days }}</strong></p>
-                    <p>Vacation days this month: <strong>{{ vacations_days }}</strong></p>
-                    <p>Planned hours by now: <strong>{{ plan_hours_passed }} / {{ total_plan_hours }}</strong></p>
-                    <p>Hours per day plan: <strong>{{ hours_per_day_plan }}</strong></p>
-                    <br>
-                    <p>Total hours worked: <strong>{{ total_hours }}</strong></p>
-                    {% if ahead %}
-                        <p>You're <strong>{{ diff_hours }}</strong> ahead of schedule ✅</p>
-                    {% elif behind %}
-                        <p>You're <strong>{{ diff_hours }}</strong> behind schedule ⚠️</p>
+            <div class="card border-0 shadow-sm mb-3 status-card {% if behind %}status-behind{% elif ahead %}status-ahead{% else %}status-ontrack{% endif %}">
+                <div class="card-body py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="status-icon">
+                                {% if behind %}
+                                    <i class="bi bi-lightning-charge-fill"></i>
+                                {% elif ahead %}
+                                    <i class="bi bi-check-circle-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-bullseye"></i>
+                                {% endif %}
+                            </span>
+                            <span class="status-label">
+                                {% if behind %}Catching up{% elif ahead %}Ahead of pace{% else %}Right on track{% endif %}
+                            </span>
+                        </div>
+                        <span class="status-value">
+                            {% if behind %}{{ diff_hours }}{% elif ahead %}+{{ diff_hours }}{% else %}0h 0m{% endif %}
+                        </span>
+                    </div>
+
+                    {% if target_met %}
+                        <div class="status-hint mt-2">🎉 Monthly target already reached.</div>
+                    {% elif remaining_working_days > 0 %}
+                        <div class="status-hint mt-2">
+                            Work <strong>{{ required_hours_per_day }}/day</strong> for the remaining
+                            <strong>{{ remaining_working_days }}</strong> working day{{ remaining_working_days|pluralize }}
+                            to hit your target.
+                        </div>
                     {% else %}
-                        <p>You're exactly on schedule 🎯</p>
+                        <div class="status-hint mt-2">No working days left this month to close the gap.</div>
                     {% endif %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-semibold small text-uppercase text-muted">Today</span>
+                        {% if is_working_day_today %}
+                            <span class="small text-muted">{{ today_hours }} / {{ daily_target }}</span>
+                        {% endif %}
+                    </div>
+                    {% if is_working_day_today %}
+                        <div class="clockify-progress">
+                            <div class="clockify-progress-fill {% if today_behind %}bg-danger{% else %}bg-success{% endif %}"
+                                 style="width: {{ percent_today_bar }}%;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted mt-1">
+                            <span>{% if daily_target_is_catchup %}catch-up pace{% else %}today's plan{% endif %}</span>
+                            <span>{{ percent_today }}%</span>
+                        </div>
+                    {% else %}
+                        <div class="small text-muted">Not a working day 🌴</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>{{ total_hours }} worked</span>
+                        <span>{{ total_plan_hours }} target</span>
+                    </div>
+                    <div class="clockify-progress mb-1">
+                        <div class="clockify-progress-fill {% if behind %}bg-danger{% else %}bg-success{% endif %}"
+                             style="width: {{ percent_hours_done_bar }}%;"></div>
+                        <div class="clockify-progress-marker" style="left: {{ percent_days_passed }}%;"
+                             title="Expected by today"></div>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>{{ percent_hours_done }}% done</span>
+                        <span>expected {{ plan_hours_passed }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm h-100 stat-tile">
+                        <div class="card-body">
+                            <div class="stat-label"><i class="bi bi-calendar-check me-1"></i>Working days</div>
+                            <div class="stat-value">{{ working_days_passed }} / {{ total_working_days }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm h-100 stat-tile">
+                        <div class="card-body">
+                            <div class="stat-label"><i class="bi bi-airplane me-1"></i>Vacation days</div>
+                            <div class="stat-value">{{ vacations_days }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm h-100 stat-tile">
+                        <div class="card-body">
+                            <div class="stat-label"><i class="bi bi-speedometer2 me-1"></i>Plan / day</div>
+                            <div class="stat-value">{{ hours_per_day_plan }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm h-100 stat-tile">
+                        <div class="card-body">
+                            <div class="stat-label"><i class="bi bi-graph-up-arrow me-1"></i>Projected total</div>
+                            <div class="stat-value {% if projected_behind %}text-danger{% elif projected_ahead %}text-success{% endif %}">
+                                {{ projected_total_hours }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         {% endif %}
     </div>
+{% endblock %}
+
+{% block custom_scrips %}
+    <style>
+        .clockify-page {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            padding: 0 .1rem;
+        }
+
+        .page-eyebrow {
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #212529;
+            line-height: 1.2;
+        }
+
+        .status-card.status-behind {
+            background: #fff4e6;
+        }
+
+        .status-card.status-ahead {
+            background: var(--menu-bg);
+        }
+
+        .status-card.status-ontrack {
+            background: #e7f1ff;
+        }
+
+        .status-icon i {
+            font-size: 1.35rem;
+        }
+
+        .status-behind .status-icon i, .status-behind .status-value {
+            color: #e8590c;
+        }
+
+        .status-ahead .status-icon i, .status-ahead .status-value {
+            color: #157347;
+        }
+
+        .status-ontrack .status-icon i, .status-ontrack .status-value {
+            color: #0d6efd;
+        }
+
+        .status-label {
+            font-size: .85rem;
+            letter-spacing: .02em;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .status-hint {
+            font-size: .85rem;
+            color: #6c757d;
+        }
+
+        .clockify-progress {
+            position: relative;
+            height: 14px;
+            background: var(--light-gray);
+            border-radius: 999px;
+            overflow: visible;
+        }
+
+        .clockify-progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: 999px;
+            transition: width .3s ease;
+        }
+
+        .clockify-progress-marker {
+            position: absolute;
+            top: -3px;
+            width: 2px;
+            height: 20px;
+            background: #212529;
+        }
+
+        .stat-tile .stat-label {
+            font-size: .78rem;
+            color: #6c757d;
+            margin-bottom: .25rem;
+        }
+
+        .stat-tile .stat-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+    </style>
 {% endblock %}
