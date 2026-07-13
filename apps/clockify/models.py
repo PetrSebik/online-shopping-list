@@ -13,6 +13,8 @@ class ClockifySettings(models.Model):
     user_id = models.CharField(max_length=50)
     hours_per_day = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     total_hours = models.IntegerField(null=True, blank=True)
+    hour_rate = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True,
+                                     help_text="Hourly rate in CZK, used to estimate earnings.")
 
     @property
     def hours_per_day_plan(self) -> Decimal:

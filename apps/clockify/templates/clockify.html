@@ -46,6 +46,12 @@
                     {% else %}
                         <div class="status-hint mt-2">No working days left this month to close the gap.</div>
                     {% endif %}
+
+                    {% if projected_earnings %}
+                        <div class="status-earnings mt-1">
+                            Projected: {{ projected_total_hours }} · ≈ {{ projected_earnings }} Kč
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -201,6 +207,11 @@
         .status-hint {
             font-size: .85rem;
             color: #6c757d;
+        }
+
+        .status-earnings {
+            font-size: .78rem;
+            color: #868e96;
         }
 
         .clockify-progress {

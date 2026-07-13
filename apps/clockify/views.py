@@ -2,6 +2,7 @@ import calendar
 from decimal import Decimal
 
 import requests
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from django.views.generic import TemplateView
@@ -10,7 +11,7 @@ from .models import ClockifySettings, Vacation
 from .utils import get_working_days_in_month, get_working_days_passed
 
 
-class ClockifyMonthlySummaryView(TemplateView):
+class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
     template_name = "clockify.html"
 
     @staticmethod
@@ -117,6 +118,10 @@ class ClockifyMonthlySummaryView(TemplateView):
             projected_total_hours = Decimal(0)
         projected_diff = projected_total_hours - total_plan_hours
 
+        projected_earnings = None
+        if clockify_setting.hour_rate:
+            projected_earnings = f"{round(projected_total_hours * clockify_setting.hour_rate):,}".replace(",", " ")
+
         context = {
             "month_label": today.strftime("%B %Y"),
             "is_working_day_today": is_working_day_today,
@@ -147,5 +152,6 @@ class ClockifyMonthlySummaryView(TemplateView):
             "projected_diff": self.format_hours_minutes(abs(projected_diff)),
             "projected_ahead": projected_diff > 0,
             "projected_behind": projected_diff < 0,
+            "projected_earnings": projected_earnings,
         }
         return self.render_to_response(context)
