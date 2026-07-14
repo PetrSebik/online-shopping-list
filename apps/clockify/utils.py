@@ -1,6 +1,30 @@
 import calendar
 from datetime import date, timedelta
 
+# Red -> orange -> green, quantized into 11 discrete bands (0%, 10%, ..., 100%)
+# rather than a smooth gradient, per design request.
+_RED = (220, 53, 69)
+_ORANGE = (253, 126, 20)
+_GREEN = (25, 135, 84)
+_COLOR_STEPS = 10
+
+
+def _lerp_rgb(start, end, fraction):
+    return tuple(round(start[i] + (end[i] - start[i]) * fraction) for i in range(3))
+
+
+def quantized_progress_color(fraction):
+    """Map a 0..1 fraction to one of 11 red->orange->green shades."""
+    fraction = max(0.0, min(1.0, fraction))
+    step = round(fraction * _COLOR_STEPS) / _COLOR_STEPS
+
+    if step <= 0.5:
+        r, g, b = _lerp_rgb(_RED, _ORANGE, step / 0.5)
+    else:
+        r, g, b = _lerp_rgb(_ORANGE, _GREEN, (step - 0.5) / 0.5)
+    return f"rgb({r}, {g}, {b})"
+
+
 def get_working_days_in_month(year, month):
     c = calendar.Calendar()
     days = c.itermonthdays2(year, month)  # (day, weekday)

@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 
 from .models import ClockifySettings, Vacation
-from .utils import get_working_days_in_month, get_working_days_passed
+from .utils import get_working_days_in_month, get_working_days_passed, quantized_progress_color
 
 
 class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
@@ -146,6 +146,12 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         daily_target = required_hours_per_day if daily_target_is_catchup else clockify_setting.hours_per_day_plan
         diff_today = today_hours - daily_target
         percent_today = round(float(today_hours) / float(daily_target) * 100) if daily_target else 0
+        today_bar_color = quantized_progress_color(percent_today / 100)
+
+        # Month bar: caught up (or ahead) is green; each percentage point behind the
+        # expected-by-today pace shifts one shade toward red, maxing out at 10pts behind.
+        deficit_points = max(0, min(10, percent_days_passed - percent_hours_done))
+        month_bar_color = quantized_progress_color(1 - deficit_points / 10)
 
         # Today's partial hours shouldn't drag the pace down while it's still in progress -
         # average only over fully completed working days, then assume today (and the rest
@@ -174,6 +180,7 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
             "daily_target_is_catchup": daily_target_is_catchup,
             "percent_today": percent_today,
             "percent_today_bar": min(percent_today, 100),
+            "today_bar_color": today_bar_color,
             "today_behind": diff_today < 0,
             "today_ahead": diff_today > 0,
             "total_hours": self.format_hours_minutes(total_hours),
@@ -189,6 +196,7 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
             "percent_days_passed": percent_days_passed,
             "percent_hours_done": percent_hours_done,
             "percent_hours_done_bar": min(percent_hours_done, 100),
+            "month_bar_color": month_bar_color,
             "remaining_working_days": remaining_working_days,
             "target_met": target_met,
             "required_hours_per_day": self.format_hours_minutes(required_hours_per_day),

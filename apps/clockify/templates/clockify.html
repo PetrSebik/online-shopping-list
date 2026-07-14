@@ -65,8 +65,8 @@
                     </div>
                     {% if is_working_day_today %}
                         <div class="clockify-progress">
-                            <div class="clockify-progress-fill {% if today_behind %}bg-danger{% else %}bg-success{% endif %}"
-                                 style="width: {{ percent_today_bar }}%;"></div>
+                            <div class="clockify-progress-fill"
+                                 style="width: {{ percent_today_bar }}%; background-color: {{ today_bar_color }};"></div>
                         </div>
                         <div class="d-flex justify-content-between small text-muted mt-1">
                             <span>{% if daily_target_is_catchup %}catch-up pace{% else %}today's plan{% endif %}</span>
@@ -85,8 +85,8 @@
                         <span>{{ total_plan_hours }} target</span>
                     </div>
                     <div class="clockify-progress mb-1">
-                        <div class="clockify-progress-fill {% if behind %}bg-danger{% else %}bg-success{% endif %}"
-                             style="width: {{ percent_hours_done_bar }}%;"></div>
+                        <div class="clockify-progress-fill"
+                             style="width: {{ percent_hours_done_bar }}%; background-color: {{ month_bar_color }};"></div>
                         <div class="clockify-progress-marker" style="left: {{ percent_days_passed }}%;"
                              title="Expected by today"></div>
                     </div>
