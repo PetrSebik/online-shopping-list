@@ -147,10 +147,19 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         diff_today = today_hours - daily_target
         percent_today = round(float(today_hours) / float(daily_target) * 100) if daily_target else 0
 
-        if working_days_passed > 0:
-            projected_total_hours = (total_hours / working_days_passed) * total_working_days
+        # Today's partial hours shouldn't drag the pace down while it's still in progress -
+        # average only over fully completed working days, then assume today (and the rest
+        # of the month) continues at that same pace, rather than at today's still-low rate.
+        completed_working_days = working_days_passed - (1 if is_working_day_today else 0)
+        hours_before_today = total_hours - today_hours
+
+        if completed_working_days > 0:
+            average_hours_per_day = hours_before_today / completed_working_days
         else:
-            projected_total_hours = Decimal(0)
+            average_hours_per_day = clockify_setting.hours_per_day_plan
+
+        days_to_project = remaining_working_days + (1 if is_working_day_today else 0)
+        projected_total_hours = hours_before_today + average_hours_per_day * days_to_project
         projected_diff = projected_total_hours - total_plan_hours
 
         projected_earnings = None
