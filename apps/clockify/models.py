@@ -21,7 +21,10 @@ class ClockifySettings(models.Model):
         if self.hours_per_day:
             return self.hours_per_day
         elif self.total_hours:
-            return Decimal(self.total_hours / Vacation.working_days_this_month())
+            working_days = Vacation.working_days_this_month()
+            if not working_days:
+                return Decimal(0)
+            return Decimal(self.total_hours / working_days)
         else:
             return Decimal(0)
 

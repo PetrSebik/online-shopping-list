@@ -1,4 +1,5 @@
 import calendar
+from datetime import datetime, timezone
 from decimal import Decimal
 
 import requests
@@ -55,8 +56,36 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
             return None
 
         data = response.json()
-        total_seconds = data.get("totals", [{}])[0].get("totalTime", 0)
+        totals = data.get("totals") or [{}]
+        total_seconds = totals[0].get("totalTime", 0)
         return Decimal(total_seconds) / Decimal(3600)
+
+    @staticmethod
+    def fetch_in_progress_hours(clockify_setting):
+        url = (
+            f"https://api.clockify.me/api/v1/workspaces/{clockify_setting.workspace_id}"
+            f"/user/{clockify_setting.user_id}/time-entries?in-progress=true"
+        )
+        headers = {
+            "X-Api-Key": clockify_setting.api_key,
+            "Content-Type": "application/json"
+        }
+
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            return Decimal(0)
+
+        entries = response.json()
+        if not entries:
+            return Decimal(0)
+
+        start_str = entries[0].get("timeInterval", {}).get("start")
+        if not start_str:
+            return Decimal(0)
+
+        start = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
+        elapsed_seconds = max((datetime.now(timezone.utc) - start).total_seconds(), 0)
+        return Decimal(elapsed_seconds) / Decimal(3600)
 
     def get(self, request, *args, **kwargs):
         uuid = kwargs.get("uuid")
@@ -84,6 +113,12 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
             f"{today_iso}T00:00:00.000Z",
             f"{today_iso}T23:59:59.999Z",
         ) or Decimal(0)
+
+        # The reports API only counts stopped entries, so a running timer contributes
+        # nothing until it's stopped. Add its elapsed time so both totals stay live.
+        in_progress_hours = self.fetch_in_progress_hours(clockify_setting)
+        total_hours += in_progress_hours
+        today_hours += in_progress_hours
 
         is_vacation_today = Vacation.objects.filter(date_from__lte=today, date_to__gte=today).exists()
         is_working_day_today = today.weekday() < 5 and not is_vacation_today
