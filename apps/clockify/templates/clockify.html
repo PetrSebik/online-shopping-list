@@ -37,10 +37,10 @@
 
                     {% if target_met %}
                         <div class="status-hint mt-2">🎉 Monthly target already reached.</div>
-                    {% elif remaining_working_days > 0 %}
+                    {% elif catch_up_days > 0 %}
                         <div class="status-hint mt-2">
                             Work <strong>{{ required_hours_per_day }}/day</strong> for the remaining
-                            <strong>{{ remaining_working_days }}</strong> working day{{ remaining_working_days|pluralize }}
+                            <strong>{{ catch_up_days }}</strong> working day{{ catch_up_days|pluralize }}
                             to hit your target.
                         </div>
                     {% else %}

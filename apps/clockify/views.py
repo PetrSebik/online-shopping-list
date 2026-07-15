@@ -135,8 +135,12 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         remaining_hours = total_plan_hours - total_hours
         target_met = remaining_hours <= 0
 
-        if remaining_working_days > 0 and not target_met:
-            required_hours_per_day = remaining_hours / remaining_working_days
+        # Today still has hours left to log, so it counts as one of the days you can
+        # still catch up on - not just the days strictly after it.
+        catch_up_days = remaining_working_days + (1 if is_working_day_today else 0)
+
+        if catch_up_days > 0 and not target_met:
+            required_hours_per_day = remaining_hours / catch_up_days
         else:
             required_hours_per_day = Decimal(0)
 
@@ -164,8 +168,7 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         else:
             average_hours_per_day = clockify_setting.hours_per_day_plan
 
-        days_to_project = remaining_working_days + (1 if is_working_day_today else 0)
-        projected_total_hours = hours_before_today + average_hours_per_day * days_to_project
+        projected_total_hours = hours_before_today + average_hours_per_day * catch_up_days
         projected_diff = projected_total_hours - total_plan_hours
 
         projected_earnings = None
@@ -197,7 +200,7 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
             "percent_hours_done": percent_hours_done,
             "percent_hours_done_bar": min(percent_hours_done, 100),
             "month_bar_color": month_bar_color,
-            "remaining_working_days": remaining_working_days,
+            "catch_up_days": catch_up_days,
             "target_met": target_met,
             "required_hours_per_day": self.format_hours_minutes(required_hours_per_day),
             "projected_total_hours": self.format_hours_minutes(projected_total_hours),
