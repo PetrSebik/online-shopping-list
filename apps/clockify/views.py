@@ -139,8 +139,14 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         # still catch up on - not just the days strictly after it.
         catch_up_days = remaining_working_days + (1 if is_working_day_today else 0)
 
+        # Use hours logged before today, not the live total, so the target doesn't
+        # shrink as today's hours come in - today is still a full slot to fill, not
+        # one that's already partially spent from the catch-up pace's point of view.
+        hours_before_today = total_hours - today_hours
+        remaining_hours_for_catchup = total_plan_hours - hours_before_today
+
         if catch_up_days > 0 and not target_met:
-            required_hours_per_day = remaining_hours / catch_up_days
+            required_hours_per_day = remaining_hours_for_catchup / catch_up_days
         else:
             required_hours_per_day = Decimal(0)
 
@@ -161,7 +167,6 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         # average only over fully completed working days, then assume today (and the rest
         # of the month) continues at that same pace, rather than at today's still-low rate.
         completed_working_days = working_days_passed - (1 if is_working_day_today else 0)
-        hours_before_today = total_hours - today_hours
 
         if completed_working_days > 0:
             average_hours_per_day = hours_before_today / completed_working_days
