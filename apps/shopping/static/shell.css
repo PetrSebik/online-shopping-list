@@ -61,17 +61,33 @@ hr.h-color { background: var(--rc-line); opacity: 1; }
 .sidebar li { margin: 0.1rem 0.5rem; }
 
 /* ---- swipe navigation transition (shopping <-> recipe book) ------------- */
-.content.swipe-exit-left  { animation: swipeExitLeft 0.16s ease forwards; }
-.content.swipe-exit-right { animation: swipeExitRight 0.16s ease forwards; }
-.content.swipe-enter-from-right { animation: swipeEnterFromRight 0.22s ease-out; }
-.content.swipe-enter-from-left  { animation: swipeEnterFromLeft 0.22s ease-out; }
+/* The outgoing page is dragged live by swipe_nav.js via inline transform/
+   opacity (touch-tracked, so no CSS animation is needed for the exit). Only
+   the incoming page — which has no drag data, just "entered from direction
+   X" — uses a canned slide-in. */
+.content.swipe-enter-from-right { animation: swipeEnterFromRight 0.2s ease-out; }
+.content.swipe-enter-from-left  { animation: swipeEnterFromLeft 0.2s ease-out; }
 
-@keyframes swipeExitLeft  { to   { transform: translateX(-30%); opacity: 0.4; } }
-@keyframes swipeExitRight { to   { transform: translateX(30%);  opacity: 0.4; } }
 @keyframes swipeEnterFromRight { from { transform: translateX(100%); opacity: 0.5; } to { transform: translateX(0); opacity: 1; } }
 @keyframes swipeEnterFromLeft  { from { transform: translateX(-100%); opacity: 0.5; } to { transform: translateX(0); opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-    .content.swipe-exit-left, .content.swipe-exit-right,
     .content.swipe-enter-from-right, .content.swipe-enter-from-left { animation: none; }
+}
+
+/* ---- native cross-document view transition (Chromium/Android only; no-op
+   elsewhere) — smooths over the network/render gap of a real MPA navigation
+   underneath the JS-driven swipe animation. Kept short so it doesn't fight
+   with that animation. ------------------------------------------------- */
+@view-transition {
+    navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.12s;
+}
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+        animation: none !important;
+    }
 }
