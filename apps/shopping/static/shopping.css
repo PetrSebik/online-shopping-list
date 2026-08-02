@@ -16,6 +16,19 @@
     flex-direction: column;
     height: 100vh;
 }
+.content:has(.shop-app) .swipe-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}
+.content:has(.shop-app) .swipe-viewport,
+.content:has(.shop-app) .swipe-preview {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+}
 .content:has(.shop-app) .shop-app,
 .content:has(.shop-app) .shop-shell {
     flex: 1 1 auto;
