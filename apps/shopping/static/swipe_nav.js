@@ -4,6 +4,12 @@
 // slide animation plays on both the outgoing and incoming page; the
 // incoming page reads which direction to enter from out of sessionStorage
 // (a one-shot flag set just before navigating away).
+//
+// Navigation uses location.replace(), not location.href/assign(), so a swipe
+// swaps the current history entry instead of pushing a new one. Otherwise
+// hopping back and forth (list -> detail -> swipe to shopping -> swipe back
+// to detail) stacks duplicate entries and the OS back button lands on an
+// intermediate stop instead of where you actually came from.
 (function () {
     const SWIPE_THRESHOLD_PX = 70;
     const MAX_VERTICAL_RATIO = 0.6;
@@ -74,13 +80,13 @@
         sessionStorage.setItem(ENTRY_DIRECTION_KEY, nextEntryDirection);
 
         if (reducedMotion) {
-            window.location.href = target;
+            window.location.replace(target);
             return;
         }
 
         content.classList.add(exitClass);
         setTimeout(() => {
-            window.location.href = target;
+            window.location.replace(target);
         }, EXIT_ANIMATION_MS);
     }, {passive: true});
 })();

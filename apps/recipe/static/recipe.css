@@ -53,7 +53,7 @@
 /* ---- toolbar: search + sort + tag chips -------------------------------- */
 .rc-toolbar { margin-bottom: 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; }
 
-.rc-toolbar-row { display: flex; gap: 0.6rem; }
+.rc-toolbar-row { display: flex; gap: 0.6rem; align-items: flex-start; }
 .rc-toolbar-row .rc-select { flex: none; }
 
 .rc-search {
@@ -97,25 +97,30 @@
 .rc-filters-label { font-size: 0.76rem; color: var(--rc-muted); font-weight: 600; margin-right: 0.1rem; }
 
 /* ---- collapsible "Filtry" panel: keeps tags/AND-OR/stale-only out of the
-   way until asked for, so the default toolbar is just search + sort. ---- */
-.rc-filters { flex: 1 1 auto; min-width: 0; }
+   way until asked for, so the default toolbar is just search + sort. A
+   hidden checkbox + :has() (not <details>) so the panel can live outside
+   the toggle's own flex column and open at full toolbar width. ---- */
+.rc-filters-toggle-input { display: none; }
 .rc-filters-toggle {
-    list-style: none; display: flex; align-items: center; gap: 0.4rem; height: 100%;
+    flex: 1 1 auto; min-width: 0;
+    display: flex; align-items: center; gap: 0.4rem;
     border: 1px solid var(--rc-line); background: var(--rc-surface); color: var(--rc-ink);
     border-radius: 14px; padding: 0.7rem 1rem; font-size: 0.92rem; font-weight: 600;
     cursor: pointer; user-select: none; transition: border-color 0.12s;
 }
-.rc-filters-toggle::-webkit-details-marker { display: none; }
 .rc-filters-toggle .bi { color: var(--rc-brand); }
-.rc-filters[open] > .rc-filters-toggle { border-color: var(--rc-brand); }
+.rc-toolbar:has(#filters-toggle:checked) .rc-filters-toggle { border-color: var(--rc-brand); }
 .rc-filters-dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--rc-accent); display: none; flex: none; }
-.rc-filters:has(.rc-chips .btn-check:checked) .rc-filters-dot,
-.rc-filters:has(#stale-only:checked) .rc-filters-dot { display: inline-block; }
+.rc-toolbar:has(input[name="tags"]:checked) .rc-filters-dot,
+.rc-toolbar:has(#stale-only:checked) .rc-filters-dot,
+.rc-toolbar:has(#tag-mode-all:checked) .rc-filters-dot { display: inline-block; }
 
 .rc-filters-panel {
+    display: none;
     margin-top: 0.7rem; background: var(--rc-surface); border: 1px solid var(--rc-line);
     border-radius: 14px; padding: 1rem;
 }
+.rc-toolbar:has(#filters-toggle:checked) .rc-filters-panel { display: block; }
 
 /* ---- results meta ------------------------------------------------------ */
 .rc-meta { color: var(--rc-muted); font-size: 0.85rem; margin: 0.2rem 0 0.9rem; }

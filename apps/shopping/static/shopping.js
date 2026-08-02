@@ -159,8 +159,6 @@ function focusInput() {
 document.addEventListener('DOMContentLoaded', () => {
     let button = document.getElementById('add-btn');
 
-    focusInput();
-
     button.addEventListener('click', addItem);
 
     initializeDisplayedItemIds();

@@ -38,44 +38,46 @@
                         </select>
 
                         {% if all_tags or user.is_authenticated %}
-                            <details class="rc-filters">
-                                <summary class="rc-filters-toggle">
-                                    <i class="bi bi-sliders"></i>Filtry
-                                    <span class="rc-filters-dot"></span>
-                                </summary>
-                                <div class="rc-filters-panel">
-                                    {% if user.is_authenticated %}
-                                        <input type="checkbox" class="btn-check" name="stale_only" value="1"
-                                               id="stale-only" autocomplete="off" {% if stale_only %}checked{% endif %}>
-                                        <label class="rc-chip" for="stale-only">Jen dlouho nevařené</label>
-                                    {% endif %}
-
-                                    {% if all_tags %}
-                                        <div class="rc-chips">
-                                            {% for tag in all_tags %}
-                                                <input type="checkbox" class="btn-check" name="tags" value="{{ tag.id }}"
-                                                       id="tag-{{ tag.id }}" autocomplete="off"
-                                                       {% if tag.id in active_tag_ids %}checked{% endif %}>
-                                                <label class="rc-chip" for="tag-{{ tag.id }}"
-                                                       style="--tag-color: {{ tag.color }}; --tag-text: {{ tag.text_color }};">
-                                                    {{ tag.name }}
-                                                </label>
-                                            {% endfor %}
-                                        </div>
-                                        <div class="rc-chips rc-tag-mode">
-                                            <span class="rc-filters-label">Shoda:</span>
-                                            <input type="radio" class="btn-check" name="tag_mode" value="any"
-                                                   id="tag-mode-any" autocomplete="off" {% if tag_mode == 'any' %}checked{% endif %}>
-                                            <label class="rc-chip" for="tag-mode-any">Alespoň jeden</label>
-                                            <input type="radio" class="btn-check" name="tag_mode" value="all"
-                                                   id="tag-mode-all" autocomplete="off" {% if tag_mode == 'all' %}checked{% endif %}>
-                                            <label class="rc-chip" for="tag-mode-all">Všechny</label>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </details>
+                            <input type="checkbox" class="rc-filters-toggle-input" id="filters-toggle" autocomplete="off">
+                            <label class="rc-filters-toggle" for="filters-toggle">
+                                <i class="bi bi-sliders"></i>Filtry
+                                <span class="rc-filters-dot"></span>
+                            </label>
                         {% endif %}
                     </div>
+
+                    {% if all_tags or user.is_authenticated %}
+                        <div class="rc-filters-panel">
+                            {% if user.is_authenticated %}
+                                <input type="checkbox" class="btn-check" name="stale_only" value="1"
+                                       id="stale-only" autocomplete="off" {% if stale_only %}checked{% endif %}>
+                                <label class="rc-chip" for="stale-only">Jen dlouho nevařené</label>
+                            {% endif %}
+
+                            {% if all_tags %}
+                                <div class="rc-chips">
+                                    {% for tag in all_tags %}
+                                        <input type="checkbox" class="btn-check" name="tags" value="{{ tag.id }}"
+                                               id="tag-{{ tag.id }}" autocomplete="off"
+                                               {% if tag.id in active_tag_ids %}checked{% endif %}>
+                                        <label class="rc-chip" for="tag-{{ tag.id }}"
+                                               style="--tag-color: {{ tag.color }}; --tag-text: {{ tag.text_color }};">
+                                            {{ tag.name }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                                <div class="rc-chips rc-tag-mode">
+                                    <span class="rc-filters-label">Shoda:</span>
+                                    <input type="radio" class="btn-check" name="tag_mode" value="any"
+                                           id="tag-mode-any" autocomplete="off" {% if tag_mode == 'any' %}checked{% endif %}>
+                                    <label class="rc-chip" for="tag-mode-any">Alespoň jeden</label>
+                                    <input type="radio" class="btn-check" name="tag_mode" value="all"
+                                           id="tag-mode-all" autocomplete="off" {% if tag_mode == 'all' %}checked{% endif %}>
+                                    <label class="rc-chip" for="tag-mode-all">Všechny</label>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </form>
 
                 {% if user.is_authenticated and stale_suggestions %}
