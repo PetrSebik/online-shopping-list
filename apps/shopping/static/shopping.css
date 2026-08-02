@@ -1,0 +1,95 @@
+/* ==========================================================================
+   Shopping list — same "kuchařka" identity as the recipe app, scoped under
+   .shop-app so other pages sharing base.html are untouched.
+   ========================================================================== */
+
+.shop-app {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color: var(--rc-ink);
+}
+
+/* Full-height flex layout: top bar + scrolling list fill exactly one screen,
+   add-bar pinned at the bottom. */
+.content:has(.shop-app) {
+    background: var(--rc-paper);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+.content:has(.shop-app) .shop-app,
+.content:has(.shop-app) .shop-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+.content:has(.shop-app) .shop-list-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.shop-shell { max-width: 720px; margin: 0 auto; width: 100%; }
+
+.shop-header { padding: 1.1rem 1.2rem 0.2rem; }
+.shop-eyebrow {
+    text-transform: uppercase; letter-spacing: 0.18em; font-size: 0.72rem;
+    font-weight: 600; color: var(--rc-brand); margin-bottom: 0.15rem;
+}
+.shop-title { font-size: clamp(1.7rem, 5vw, 2.3rem); font-weight: 700; line-height: 1.05; margin: 0; }
+
+.shop-list-scroll { padding: 0.6rem 1.2rem 6rem; }
+
+.shop-list {
+    list-style: none; margin: 0; padding: 0;
+    background: var(--rc-surface); border: 1px solid var(--rc-line);
+    border-radius: 16px; overflow: hidden;
+}
+.shop-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.85rem 1.1rem; border-bottom: 1px solid var(--rc-line);
+}
+.shop-item:last-child { border-bottom: 0; }
+.shop-item-name { font-weight: 600; }
+.shop-item-qty { color: var(--rc-brand); font-weight: 600; margin-right: 0.4rem; font-variant-numeric: tabular-nums; }
+
+.shop-remove {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid var(--rc-line);
+    background: var(--rc-surface); color: var(--rc-muted); text-decoration: none; cursor: pointer;
+    transition: background 0.13s, color 0.13s, border-color 0.13s;
+}
+.shop-remove:hover { background: var(--rc-stale); border-color: var(--rc-stale); color: #fff; }
+
+.shop-empty-row {
+    list-style: none; text-align: center; color: var(--rc-muted); padding: 2.6rem 1rem;
+}
+.shop-empty-row .bi { font-size: 1.8rem; display: block; margin-bottom: 0.5rem; opacity: 0.6; }
+
+/* ---- add bar: fixed floating pill at the bottom ------------------------- */
+.shop-add-bar {
+    position: fixed; bottom: 0; left: 250px; right: 0; padding: 0.8rem 1.2rem;
+    background: linear-gradient(to top, var(--rc-paper) 60%, transparent); z-index: 900;
+}
+.shop-add-form {
+    max-width: 720px; margin: 0 auto; display: flex; gap: 0.5rem; align-items: center;
+    background: var(--rc-surface); border: 1px solid var(--rc-line); border-radius: 999px;
+    padding: 0.35rem 0.4rem 0.35rem 1.1rem; box-shadow: 0 8px 24px rgba(38, 33, 28, 0.10);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.shop-add-form:focus-within { border-color: var(--rc-brand); box-shadow: 0 0 0 4px rgba(46, 93, 69, 0.12); }
+.shop-add-input {
+    flex: 1 1 auto; border: 0; outline: 0; background: transparent;
+    font-size: 1rem; color: var(--rc-ink); padding: 0.6rem 0; min-width: 0;
+}
+.shop-add-input::placeholder { color: var(--rc-muted); }
+.shop-add-btn {
+    flex: none; background: var(--rc-brand); color: #fff; border: 0; border-radius: 999px;
+    width: 2.6rem; height: 2.6rem; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.15rem; cursor: pointer; transition: background 0.13s;
+}
+.shop-add-btn:hover { background: var(--rc-brand-d); }
+
+@media (max-width: 992px) {
+    .shop-add-bar { left: 0; }
+}

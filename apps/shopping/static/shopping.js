@@ -58,10 +58,26 @@ function fetchItems() {
             data.forEach(item => {
                 updateList(item);
             });
+
+            refreshEmptyState();
         })
         .catch(error => {
             console.error('Error:', error);
         });
+}
+
+function refreshEmptyState() {
+    let listContainer = document.getElementById('list-items');
+    let hasItems = listContainer.querySelector('.shop-item') !== null;
+    let emptyMessage = document.getElementById('empty-message');
+    if (!hasItems && !emptyMessage) {
+        listContainer.insertAdjacentHTML(
+            'beforeend',
+            '<li id="empty-message" class="shop-empty-row"><i class="bi bi-basket3"></i>Nákupní seznam je prázdný.</li>'
+        );
+    } else if (hasItems && emptyMessage) {
+        emptyMessage.remove();
+    }
 }
 
 function updateList(item) {
@@ -73,18 +89,26 @@ function updateList(item) {
         // create the <li> element
         listItem = document.createElement('li');
         listItem.id = itemId;
-        listItem.className = 'list-group-item';
+        listItem.className = 'shop-item';
 
+        let textSpan = document.createElement('span');
+        textSpan.className = 'shop-item-text';
         if (item.quantity !== null) {
-            listItem.textContent = `${item.quantity}x ${item.name}`;
-        } else {
-            listItem.textContent = item.name;
+            let qtySpan = document.createElement('span');
+            qtySpan.className = 'shop-item-qty';
+            qtySpan.textContent = `${item.quantity}×`;
+            textSpan.appendChild(qtySpan);
         }
+        let nameSpan = document.createElement('span');
+        nameSpan.className = 'shop-item-name';
+        nameSpan.textContent = item.name;
+        textSpan.appendChild(nameSpan);
+        listItem.appendChild(textSpan);
 
         // crete the <a> element for deleting the item
         let removeLink = document.createElement('a');
         removeLink.id = `remove-${item.id}`;
-        removeLink.className = 'btn btn-danger btn-sm float-end';
+        removeLink.className = 'shop-remove';
         removeLink.addEventListener('click', () => {
             removeItem(item.id);
         });
@@ -99,6 +123,7 @@ function updateList(item) {
         let listContainer = document.getElementById('list-items');
         listContainer.appendChild(listItem);
         displayedItemIds.push(item.id);
+        refreshEmptyState();
     }
 }
 
@@ -116,6 +141,7 @@ function removeItem(itemId) {
                 if (listItem) {
                     listItem.remove();
                 }
+                refreshEmptyState();
             } else {
                 console.error('Failed to delete item:', response.status);
             }

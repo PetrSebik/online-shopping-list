@@ -23,6 +23,7 @@ class Recipe(models.Model):
     description = models.CharField(max_length=512, blank=True, null=True)
     last_cooked_date = models.DateField(blank=True, null=True)
     tags = models.ManyToManyField(Tag, blank=True)
+    hide_from_tracking = models.BooleanField(default=False)
 
     def get_ordered_steps(self):
         return self.steps.order_by('number').all()
@@ -40,3 +41,21 @@ class RecipeStep(models.Model):
     recipe = models.ForeignKey("recipe.Recipe", on_delete=models.CASCADE, related_name="steps")
     number = models.PositiveIntegerField(default=1)
     text = models.TextField(max_length=1024)
+
+
+class PantryStaple(models.Model):
+    name = models.CharField(max_length=64, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class PurchaseUnit(models.Model):
+    """Units meaningful on a shopping list (500 g flour, 2 ks eggs), as
+    opposed to prep-only measures (hrnky, ČL, PL, špetka...). An ingredient
+    whose unit isn't in this whitelist is added to the shopping list by name
+    only, without its recipe quantity."""
+    name = models.CharField(max_length=16, unique=True)
+
+    def __str__(self):
+        return self.name

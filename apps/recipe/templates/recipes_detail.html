@@ -2,9 +2,6 @@
 {% load static %}
 
 {% block custom_scrips %}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'recipe.css' %}">
 {% endblock %}
 
@@ -17,46 +14,10 @@
                     <i class="bi bi-arrow-left"></i>Zpět na recepty
                 </a>
 
-                <div class="rc-detail-head">
-                    <div>
-                        <h1 class="rc-detail-title">{{ recipe.name }}</h1>
-                        {% if recipe.description %}
-                            <p class="rc-detail-desc">{{ recipe.description }}</p>
-                        {% endif %}
-                        {% if recipe.tags.all %}
-                            <div class="rc-tags">
-                                {% for tag in recipe.tags.all %}
-                                    <span class="rc-tag" style="background-color: {{ tag.color }}; color: {{ tag.text_color }};">
-                                        {{ tag.name }}
-                                    </span>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    {% if user.is_authenticated %}
-                        {% include 'recipe_cooked_control.html' %}
-                    {% endif %}
-                </div>
+                {% include 'recipe_detail_head.html' %}
 
                 <div class="rc-grid">
-                    <div class="rc-section rc-ingredients">
-                        <div class="rc-section-head"><i class="bi bi-basket3"></i>Suroviny</div>
-                        {% for item in recipe.items.all %}
-                            <div class="rc-ing">
-                                <div>
-                                    <div class="rc-ing-name">{{ item.name }}</div>
-                                    {% if item.description %}
-                                        <div class="rc-ing-desc">{{ item.description }}</div>
-                                    {% endif %}
-                                </div>
-                                {% if item.count or item.units %}
-                                    <div class="rc-ing-amt">{{ item.count|default_if_none:"" }} {{ item.units|default_if_none:"" }}</div>
-                                {% endif %}
-                            </div>
-                        {% empty %}
-                            <div class="rc-section-empty">Žádné suroviny nebyly zadány</div>
-                        {% endfor %}
-                    </div>
+                    {% include 'recipe_ingredients_section.html' %}
 
                     <div class="rc-section">
                         <div class="rc-section-head"><i class="bi bi-list-ol"></i>Postup</div>

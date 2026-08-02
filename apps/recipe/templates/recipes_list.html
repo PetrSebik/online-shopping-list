@@ -2,9 +2,6 @@
 {% load static %}
 
 {% block custom_scrips %}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'recipe.css' %}">
 {% endblock %}
 
@@ -25,12 +22,13 @@
                       hx-swap="innerHTML"
                       hx-trigger="change, keyup changed delay:300ms from:input[name=q], submit"
                       onsubmit="return false">
-                    <div class="d-flex flex-wrap gap-2">
-                        <label class="rc-search">
-                            <i class="bi bi-search"></i>
-                            <input type="search" name="q" value="{{ query }}"
-                                   placeholder="Hledat podle názvu nebo suroviny…" autocomplete="off">
-                        </label>
+                    <label class="rc-search">
+                        <i class="bi bi-search"></i>
+                        <input type="search" name="q" value="{{ query }}"
+                               placeholder="Hledat podle názvu nebo suroviny…" autocomplete="off">
+                    </label>
+
+                    <div class="rc-toolbar-row">
                         <select name="sort" class="rc-select">
                             <option value="name"   {% if sort == 'name' %}selected{% endif %}>Název (A–Z)</option>
                             {% if user.is_authenticated %}
@@ -38,22 +36,51 @@
                                 <option value="stale"  {% if sort == 'stale' %}selected{% endif %}>Nejdéle nevařeno</option>
                             {% endif %}
                         </select>
-                    </div>
 
-                    {% if all_tags %}
-                        <div class="rc-chips">
-                            {% for tag in all_tags %}
-                                <input type="checkbox" class="btn-check" name="tags" value="{{ tag.id }}"
-                                       id="tag-{{ tag.id }}" autocomplete="off"
-                                       {% if tag.id in active_tag_ids %}checked{% endif %}>
-                                <label class="rc-chip" for="tag-{{ tag.id }}"
-                                       style="--tag-color: {{ tag.color }}; --tag-text: {{ tag.text_color }};">
-                                    {{ tag.name }}
-                                </label>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                        {% if all_tags or user.is_authenticated %}
+                            <details class="rc-filters">
+                                <summary class="rc-filters-toggle">
+                                    <i class="bi bi-sliders"></i>Filtry
+                                    <span class="rc-filters-dot"></span>
+                                </summary>
+                                <div class="rc-filters-panel">
+                                    {% if user.is_authenticated %}
+                                        <input type="checkbox" class="btn-check" name="stale_only" value="1"
+                                               id="stale-only" autocomplete="off" {% if stale_only %}checked{% endif %}>
+                                        <label class="rc-chip" for="stale-only">Jen dlouho nevařené</label>
+                                    {% endif %}
+
+                                    {% if all_tags %}
+                                        <div class="rc-chips">
+                                            {% for tag in all_tags %}
+                                                <input type="checkbox" class="btn-check" name="tags" value="{{ tag.id }}"
+                                                       id="tag-{{ tag.id }}" autocomplete="off"
+                                                       {% if tag.id in active_tag_ids %}checked{% endif %}>
+                                                <label class="rc-chip" for="tag-{{ tag.id }}"
+                                                       style="--tag-color: {{ tag.color }}; --tag-text: {{ tag.text_color }};">
+                                                    {{ tag.name }}
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="rc-chips rc-tag-mode">
+                                            <span class="rc-filters-label">Shoda:</span>
+                                            <input type="radio" class="btn-check" name="tag_mode" value="any"
+                                                   id="tag-mode-any" autocomplete="off" {% if tag_mode == 'any' %}checked{% endif %}>
+                                            <label class="rc-chip" for="tag-mode-any">Alespoň jeden</label>
+                                            <input type="radio" class="btn-check" name="tag_mode" value="all"
+                                                   id="tag-mode-all" autocomplete="off" {% if tag_mode == 'all' %}checked{% endif %}>
+                                            <label class="rc-chip" for="tag-mode-all">Všechny</label>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </details>
+                        {% endif %}
+                    </div>
                 </form>
+
+                {% if user.is_authenticated and stale_suggestions %}
+                    {% include 'stale_suggestions_widget.html' %}
+                {% endif %}
 
                 <div id="recipes-list">
                     {% include 'recipes_list_partial.html' %}

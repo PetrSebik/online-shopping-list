@@ -15,7 +15,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
           crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'base.css' %}">
+    <link rel="stylesheet" href="{% static 'shell.css' %}">
     <script src="{% static 'jquery-3.7.1/jquery-3.7.1.min.js' %}" type="text/javascript"></script>
     <script src="{% static 'htmx.js' %}"></script>
 
@@ -68,6 +72,7 @@
 <!-- Add Bootstrap 5 JS (Optional, for Bootstrap features like modals) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
+<script src="{% static 'swipe_nav.js' %}" defer></script>
 {% include "pwa_register.html" %}
 </body>
 </html>

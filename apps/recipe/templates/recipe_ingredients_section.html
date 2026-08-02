@@ -1,0 +1,58 @@
+{% load recipe_extras %}
+<div class="rc-section rc-ingredients" id="rc-ingredients-{{ recipe.id }}">
+    <div class="rc-section-head"><i class="bi bi-basket3"></i>Suroviny</div>
+
+    {% if add_to_list_message %}
+        <div class="rc-add-list-msg">{{ add_to_list_message }}</div>
+    {% endif %}
+
+    {% if recipe.items.all %}
+        {% if picker_mode %}
+        <form hx-post="{% url 'recipe_add_to_list' recipe.id %}"
+              hx-target="#rc-ingredients-{{ recipe.id }}" hx-swap="outerHTML">
+        {% endif %}
+        {% for item in recipe.items.all %}
+            {% if picker_mode %}
+            <label class="rc-ing rc-ing-pick">
+                <input type="checkbox" name="item_ids" value="{{ item.id }}"
+                       {% if not item.name|is_pantry_staple:pantry_staple_names %}checked{% endif %}>
+            {% else %}
+            <div class="rc-ing">
+            {% endif %}
+                <div>
+                    <div class="rc-ing-name">{{ item.name }}</div>
+                    {% if item.description %}
+                        <div class="rc-ing-desc">{{ item.description }}</div>
+                    {% endif %}
+                </div>
+                {% if item.count or item.units %}
+                    <div class="rc-ing-amt">{{ item.count|default_if_none:"" }} {{ item.units|default_if_none:"" }}</div>
+                {% endif %}
+            {% if picker_mode %}
+            </label>
+            {% else %}
+            </div>
+            {% endif %}
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+            {% if picker_mode %}
+                <div class="rc-add-actions">
+                    <button type="submit" class="rc-add-btn"><i class="bi bi-cart-plus"></i>Přidat vybrané</button>
+                    <button type="button" class="rc-add-cancel"
+                            hx-get="{% url 'recipe_add_to_list' recipe.id %}"
+                            hx-target="#rc-ingredients-{{ recipe.id }}" hx-swap="outerHTML">Zrušit</button>
+                </div>
+                </form>
+            {% else %}
+                <button type="button" class="rc-add-btn"
+                        hx-get="{% url 'recipe_add_to_list' recipe.id %}?picker=1"
+                        hx-target="#rc-ingredients-{{ recipe.id }}" hx-swap="outerHTML">
+                    <i class="bi bi-cart-plus"></i>Přidat do nákupního seznamu
+                </button>
+            {% endif %}
+        {% endif %}
+    {% else %}
+        <div class="rc-section-empty">Žádné suroviny nebyly zadány</div>
+    {% endif %}
+</div>

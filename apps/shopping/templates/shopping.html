@@ -2,48 +2,53 @@
 {% load static %}
 
 {% block custom_scrips %}
+    <link rel="stylesheet" href="{% static 'shopping.css' %}">
     <script src="{% static 'shopping.js' %}"></script>
 {% endblock %}
 
 {% block body %}
+    <div class="shop-app">
+        <div class="shop-shell">
 
-    <div class="container-fluid h-90-overflow p-3">
-        <div class="row mb-5">
-            <div class="col-lg-6">
-                <!-- Shopping List -->
-                <ul id="list-items" class="list-group">
+            <div class="shop-header">
+                <div class="shop-eyebrow">Domácnost</div>
+                <h1 class="shop-title">Nákupní seznam</h1>
+            </div>
+
+            <div class="shop-list-scroll">
+                <ul id="list-items" class="shop-list">
                     {% for item in shopping_list %}
-                        <li id="item-{{ item.id }}" class="list-group-item">
-
-                            {% if item.quantity %}
-                                {{ item.quantity }}x
-                            {% endif %}
-                            {{ item.name }}
-
-                            <a id="remove-{{ item.id }}" class="btn btn-danger btn-sm float-end">
+                        <li id="item-{{ item.id }}" class="shop-item">
+                            <span class="shop-item-text">
+                                {% if item.quantity %}
+                                    <span class="shop-item-qty">{{ item.quantity }}×</span>
+                                {% endif %}
+                                <span class="shop-item-name">{{ item.name }}</span>
+                            </span>
+                            <a id="remove-{{ item.id }}" class="shop-remove">
                                 <i class="bi bi-x-lg"></i>
                             </a>
+                        </li>
+                    {% empty %}
+                        <li id="empty-message" class="shop-empty-row">
+                            <i class="bi bi-basket3"></i>
+                            Nákupní seznam je prázdný.
                         </li>
                     {% endfor %}
                 </ul>
             </div>
+
         </div>
     </div>
 
-    <div class="input-section fixed-bottom bg-light">
-        <form class="row p-1">
+    <div class="shop-add-bar">
+        <form class="shop-add-form">
             {% csrf_token %}
-            <div class="col">
-                <div class="form-floating">
-                    <input type="text" class="form-control" id="item-value" placeholder="item"
-                           name="name" autofocus="autofocus">
-                    <label for="item-value">Item Name</label>
-                </div>
-            </div>
-            <div class="col col-auto px-3 d-flex justify-content-center align-items-center">
-                <button id="add-btn" class="btn btn-lg btn-primary">Add</button>
-            </div>
+            <input type="text" class="shop-add-input" id="item-value" placeholder="Přidat položku…"
+                   name="name" autofocus="autofocus" autocomplete="off">
+            <button id="add-btn" class="shop-add-btn" aria-label="Přidat">
+                <i class="bi bi-plus-lg"></i>
+            </button>
         </form>
     </div>
-
 {% endblock %}

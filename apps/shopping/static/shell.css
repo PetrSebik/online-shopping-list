@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Global shell — shared "kuchařka" cookbook identity across the whole app
+   (page background, navbar, sidemenu). Loaded on every page via base.html so
+   the design tokens exist everywhere, not just on recipe pages.
+   ========================================================================== */
+
+:root {
+    --rc-paper:   #F7F4ED;   /* warm linen background            */
+    --rc-paper-2: #EFEADD;   /* slightly deeper paper            */
+    --rc-surface: #FFFFFF;
+    --rc-ink:     #26211C;   /* warm near-black                  */
+    --rc-muted:   #8A8276;   /* warm grey                        */
+    --rc-line:    #E7E0D2;   /* hairline                         */
+    --rc-brand:   #2E5D45;   /* deep herb green                  */
+    --rc-brand-d: #21452F;
+    --rc-brand-soft: #E7EFE9;
+    --rc-accent:  #D9942F;   /* warm amber                       */
+
+    /* freshness scale (recipe app) */
+    --rc-fresh:  #3F9D6B;
+    --rc-recent: #86A33C;
+    --rc-aging:  #D9942F;
+    --rc-stale:  #C2683B;
+    --rc-never:  #C2BBAD;
+}
+
+body {
+    background: var(--rc-paper);
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color: var(--rc-ink);
+    -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 {
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    letter-spacing: -0.015em;
+}
+
+.content { background: var(--rc-paper); touch-action: pan-y; }
+
+/* ---- top navbar --------------------------------------------------------- */
+.navbar { background: var(--rc-paper) !important; border-bottom: 1px solid var(--rc-line); }
+.navbar .open-btn { color: var(--rc-ink); }
+.navbar .btn-outline-success { color: var(--rc-brand); border-color: var(--rc-brand); }
+.navbar .btn-outline-success:hover { background: var(--rc-brand); border-color: var(--rc-brand); color: #fff; }
+.navbar .btn-outline-danger { color: var(--rc-muted); border-color: var(--rc-line); }
+.navbar .btn-outline-danger:hover { background: var(--rc-stale); border-color: var(--rc-stale); color: #fff; }
+
+/* ---- sidemenu ------------------------------------------------------------ */
+#side_nav { background: var(--rc-paper-2); border-right: 1px solid var(--rc-line); }
+#side_nav .header-box { border-bottom: 1px solid var(--rc-line); padding-bottom: 0.9rem !important; }
+#side_nav .close-btn { color: var(--rc-muted); }
+hr.h-color { background: var(--rc-line); opacity: 1; }
+
+.sidebar li a {
+    color: var(--rc-muted); font-weight: 500; font-size: 0.92rem;
+    border-radius: 10px !important; transition: background 0.12s, color 0.12s;
+}
+.sidebar li a:hover { background: var(--rc-surface); color: var(--rc-ink); }
+.sidebar li.active { background: var(--rc-brand) !important; }
+.sidebar li.active a, .sidebar li.active a:hover { color: #fff !important; background: transparent; }
+.sidebar li { margin: 0.1rem 0.5rem; }
+
+/* ---- swipe navigation transition (shopping <-> recipe book) ------------- */
+.content.swipe-exit-left  { animation: swipeExitLeft 0.16s ease forwards; }
+.content.swipe-exit-right { animation: swipeExitRight 0.16s ease forwards; }
+.content.swipe-enter-from-right { animation: swipeEnterFromRight 0.22s ease-out; }
+.content.swipe-enter-from-left  { animation: swipeEnterFromLeft 0.22s ease-out; }
+
+@keyframes swipeExitLeft  { to   { transform: translateX(-30%); opacity: 0.4; } }
+@keyframes swipeExitRight { to   { transform: translateX(30%);  opacity: 0.4; } }
+@keyframes swipeEnterFromRight { from { transform: translateX(100%); opacity: 0.5; } to { transform: translateX(0); opacity: 1; } }
+@keyframes swipeEnterFromLeft  { from { transform: translateX(-100%); opacity: 0.5; } to { transform: translateX(0); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .content.swipe-exit-left, .content.swipe-exit-right,
+    .content.swipe-enter-from-right, .content.swipe-enter-from-left { animation: none; }
+}

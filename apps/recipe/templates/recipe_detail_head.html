@@ -1,0 +1,34 @@
+{% load recipe_extras %}
+<div class="rc-detail-head" id="rc-detail-head-{{ recipe.id }}">
+    <h1 class="rc-detail-title">{{ recipe.name }}</h1>
+    {% if recipe.description %}
+        <p class="rc-detail-desc">{{ recipe.description }}</p>
+    {% endif %}
+    {% if recipe.tags.all %}
+        <div class="rc-tags">
+            {% for tag in recipe.tags.all %}
+                <span class="rc-tag" style="background-color: {{ tag.color }}; color: {{ tag.text_color }};">
+                    {{ tag.name }}
+                </span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <div class="rc-detail-meta">
+            {% if not recipe.hide_from_tracking %}
+                {% include 'recipe_cooked_control.html' %}
+            {% endif %}
+            <label class="rc-track-toggle">
+                <input type="checkbox" class="btn-check"
+                       hx-post="{% url 'recipe_toggle_tracking' recipe.id %}"
+                       hx-target="#rc-detail-head-{{ recipe.id }}" hx-swap="outerHTML"
+                       {% if not recipe.hide_from_tracking %}checked{% endif %}>
+                <span class="rc-track-toggle-pill">
+                    <i class="bi bi-eye{% if recipe.hide_from_tracking %}-slash{% endif %}"></i>
+                    {% if recipe.hide_from_tracking %}Nesledováno{% else %}Sledováno{% endif %}
+                </span>
+            </label>
+        </div>
+    {% endif %}
+</div>

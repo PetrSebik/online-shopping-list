@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import path, reverse
 
-from .models import Recipe, RecipeItem, RecipeStep, Tag
+from .models import PantryStaple, PurchaseUnit, Recipe, RecipeItem, RecipeStep, Tag
 
 
 class RecipeItemInline(admin.TabularInline):
@@ -76,7 +76,7 @@ def _build_schema(tag_names):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'last_cooked_date')
+    list_display = ('name', 'description', 'last_cooked_date', 'hide_from_tracking')
     inlines = [RecipeItemInline, RecipeStepInline]
     change_list_template = "admin/recipe/recipe/change_list.html"
     change_form_template = "admin/recipe/recipe/change_form.html"
@@ -166,3 +166,13 @@ class RecipeAdmin(admin.ModelAdmin):
 @admin.register(Tag)
 class TagsAdmin(admin.ModelAdmin):
     list_display = ('name', 'color',)
+
+
+@admin.register(PantryStaple)
+class PantryStapleAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+
+@admin.register(PurchaseUnit)
+class PurchaseUnitAdmin(admin.ModelAdmin):
+    list_display = ('name',)

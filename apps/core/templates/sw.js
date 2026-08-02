@@ -1,7 +1,9 @@
 {% load static %}
-const CACHE_NAME = "home-hub-v1";
+const CACHE_NAME = "home-hub-v2";
 const PRECACHE_URLS = [
     "{% static 'base.css' %}",
+    "{% static 'shell.css' %}",
+    "{% static 'swipe_nav.js' %}",
     "{% static 'icon/icon-192.png' %}",
     "{% static 'icon/icon-512.png' %}",
 ];

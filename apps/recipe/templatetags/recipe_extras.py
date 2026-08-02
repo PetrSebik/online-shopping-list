@@ -51,6 +51,13 @@ def cooked_freshness(value):
 
 
 @register.filter
+def is_pantry_staple(name, staple_names):
+    """Whether an ingredient name matches the pantry-staple blacklist (used to
+    default its shopping-list checkbox to unchecked)."""
+    return (name or "").strip().lower() in staple_names
+
+
+@register.filter
 def recipe_count_cs(n):
     """Grammatically correct Czech count: 1 recept / 2 recepty / 5 receptů."""
     n = int(n)
