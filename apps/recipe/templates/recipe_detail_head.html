@@ -1,6 +1,11 @@
 {% load recipe_extras %}
 <div class="rc-detail-head" id="rc-detail-head-{{ recipe.id }}">
-    <h1 class="rc-detail-title">{{ recipe.name }}</h1>
+    <div class="rc-title-row">
+        <h1 class="rc-detail-title">{{ recipe.name }}</h1>
+        <button type="button" class="rc-share-btn" data-share-title="{{ recipe.name }}" aria-label="Sdílet recept">
+            <i class="bi bi-share"></i>
+        </button>
+    </div>
     {% if recipe.description %}
         <p class="rc-detail-desc">{{ recipe.description }}</p>
     {% endif %}

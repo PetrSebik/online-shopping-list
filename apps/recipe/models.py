@@ -1,5 +1,6 @@
 from colorfield.fields import ColorField
 from django.db import models
+from django.utils.text import slugify
 
 
 class Tag(models.Model):
@@ -20,6 +21,7 @@ class Tag(models.Model):
 
 class Recipe(models.Model):
     name = models.CharField(max_length=64)
+    slug = models.SlugField(max_length=90, unique=True, blank=True)
     description = models.CharField(max_length=512, blank=True, null=True)
     last_cooked_date = models.DateField(blank=True, null=True)
     tags = models.ManyToManyField(Tag, blank=True)
@@ -27,6 +29,17 @@ class Recipe(models.Model):
 
     def get_ordered_steps(self):
         return self.steps.order_by('number').all()
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name) or "recept"
+            slug = base_slug
+            suffix = 2
+            while Recipe.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{suffix}"
+                suffix += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 
 
 class RecipeItem(models.Model):

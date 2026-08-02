@@ -245,7 +245,18 @@
 .rc-back:hover { color: var(--rc-brand); }
 
 .rc-detail-head { margin-bottom: 1.6rem; }
-.rc-detail-title { font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 700; line-height: 1.02; margin: 0 0 0.5rem; }
+.rc-title-row { display: flex; align-items: flex-start; gap: 0.6rem; }
+.rc-detail-title {
+    flex: 1 1 auto; min-width: 0;
+    font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 700; line-height: 1.02; margin: 0 0 0.5rem;
+}
+.rc-share-btn {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 2.4rem; height: 2.4rem; margin-top: 0.3rem; border-radius: 50%;
+    border: 1px solid var(--rc-line); background: var(--rc-surface); color: var(--rc-muted);
+    font-size: 1.05rem; cursor: pointer; transition: background 0.13s, color 0.13s, border-color 0.13s;
+}
+.rc-share-btn:hover, .rc-share-btn:disabled { background: var(--rc-brand); border-color: var(--rc-brand); color: #fff; }
 .rc-detail-desc { color: var(--rc-muted); margin: 0 0 0.7rem; max-width: 52ch; }
 
 /* Cooked control + tracking toggle: one row, wraps on narrow screens, never

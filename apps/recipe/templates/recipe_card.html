@@ -1,7 +1,7 @@
 {% load recipe_extras %}
 <div class="rc-card{% if user.is_authenticated and not recipe.hide_from_tracking %} {{ recipe.last_cooked_date|cooked_freshness }}{% endif %}" id="recipe-{{ recipe.id }}">
     <div class="rc-card-top">
-        <a href="{% url 'recipe_detail' recipe.id %}" class="rc-name">{{ recipe.name|default_if_none:"—" }}</a>
+        <a href="{% url 'recipe_detail' recipe.slug %}" class="rc-name">{{ recipe.name|default_if_none:"—" }}</a>
         {% if user.is_authenticated and not recipe.hide_from_tracking %}
             <span class="rc-recency-compact">{{ recipe.last_cooked_date|cooked_since }}</span>
         {% endif %}

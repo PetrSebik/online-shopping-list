@@ -76,7 +76,8 @@ def _build_schema(tag_names):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'last_cooked_date', 'hide_from_tracking')
+    list_display = ('name', 'slug', 'description', 'last_cooked_date', 'hide_from_tracking')
+    prepopulated_fields = {'slug': ('name',)}
     inlines = [RecipeItemInline, RecipeStepInline]
     change_list_template = "admin/recipe/recipe/change_list.html"
     change_form_template = "admin/recipe/recipe/change_form.html"

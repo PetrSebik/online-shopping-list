@@ -3,7 +3,7 @@
     <div class="rc-stale-widget-head"><i class="bi bi-hourglass-split"></i>Co dlouho nevařeno</div>
     <div class="rc-stale-widget-list">
         {% for recipe in stale_suggestions %}
-            <a href="{% url 'recipe_detail' recipe.id %}" class="rc-stale-card">
+            <a href="{% url 'recipe_detail' recipe.slug %}" class="rc-stale-card">
                 <span class="rc-stale-name">{{ recipe.name }}</span>
                 <span class="rc-stale-since">{{ recipe.last_cooked_date|cooked_since }}</span>
             </a>

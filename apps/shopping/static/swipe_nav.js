@@ -32,7 +32,8 @@
     const RESISTANCE = 0.35;
     const FALLBACK_EXIT_PCT = 55;
     const FALLBACK_EXIT_MIN_OPACITY = 0.45;
-    const FLOATING_TRAVEL_PX = 150;
+    const FLOATING_TRAVEL_FRACTION = 0.35; // fraction of screen width to fully reveal/hide over
+    const FLOATING_HIDE_PX = 100; // fixed travel distance for the floating UI — see note below
     const COMMIT_MS = 140;
     const SNAPBACK_MS = 180;
     const ENTRY_DIRECTION_KEY = "swipeEntryDirection";
@@ -112,10 +113,12 @@
         return FREE_DRAG_PX + (distance - FREE_DRAG_PX) * RESISTANCE;
     }
 
-    // 0 (untouched) -> 1 (fully travelled), independent of the horizontal
-    // dampening curve — the floating UI only needs to clear its own height.
+    // 0 (untouched) -> 1 (fully travelled). Scaled to screen width (not a
+    // fixed pixel count) and to the same dampened value the content ghost
+    // uses, so the floating panel reveals/hides at roughly the same rate the
+    // content visibly slides, instead of finishing almost immediately.
     function floatingProgress(dampened) {
-        return Math.min(Math.abs(dampened) / FLOATING_TRAVEL_PX, 1);
+        return Math.min(Math.abs(dampened) / (window.innerWidth * FLOATING_TRAVEL_FRACTION), 1);
     }
 
     let startX = null;
@@ -170,9 +173,16 @@
     // The floating ghost always represents "arriving" — it reveals (slides
     // up from fully hidden) as the drag progresses, regardless of direction,
     // since it only ever appears when the destination has floating content.
+    // Uses a fixed pixel distance (FLOATING_HIDE_PX), not a percentage: the
+    // ghost starts empty (no innerHTML until the fetch resolves), so it has
+    // zero height — translateY(X%) of a zero-height element is always 0px,
+    // meaning a percentage-based offset silently does nothing until content
+    // loads and the element suddenly gains real height, at which point the
+    // stale percentage resolves to a real pixel value all at once. That's
+    // the "appears out of nowhere" jump this fixes.
     function positionFloatingGhost(state, dampened) {
         if (!state || !state.floatingEl) return;
-        state.floatingEl.style.transform = `translateY(${(1 - floatingProgress(dampened)) * 100}%)`;
+        state.floatingEl.style.transform = `translateY(${(1 - floatingProgress(dampened)) * FLOATING_HIDE_PX}px)`;
     }
 
     function discardPreview(state) {
@@ -208,7 +218,7 @@
         }
         if (activePreview && activePreview.floatingEl) {
             activePreview.floatingEl.style.transition = transition;
-            activePreview.floatingEl.style.transform = "translateY(100%)";
+            activePreview.floatingEl.style.transform = `translateY(${FLOATING_HIDE_PX}px)`;
         }
         preview = null;
 
@@ -236,6 +246,12 @@
             discardPreview(preview);
             preview = null;
         }
+        // Belt-and-braces: if the previous gesture snapped back and this new
+        // touch started before that snapback's transitionend fired, snapBack()
+        // already nulled `preview` — its cleanup is still pending, not lost.
+        // A fast re-drag can easily preempt that, leaving orphaned ghost(s)
+        // in the DOM. Just remove anything left over unconditionally.
+        document.querySelectorAll(".swipe-preview, .swipe-floating-preview").forEach((el) => el.remove());
     }, {passive: true});
 
     viewport.addEventListener("touchmove", (event) => {
@@ -267,7 +283,7 @@
             positionPreview(preview, dragDirection, dampened);
         }
         if (floatingContent) {
-            floatingContent.style.transform = `translateY(${floatingProgress(dampened) * 100}%)`;
+            floatingContent.style.transform = `translateY(${floatingProgress(dampened) * FLOATING_HIDE_PX}px)`;
         }
         if (preview && preview.floatingEl) {
             positionFloatingGhost(preview, dampened);
@@ -324,7 +340,7 @@
 
         if (floatingContent) {
             floatingContent.style.transition = `transform ${COMMIT_MS}ms ease-in`;
-            floatingContent.style.transform = "translateY(100%)";
+            floatingContent.style.transform = `translateY(${FLOATING_HIDE_PX}px)`;
         }
         if (usingPreview && activePreview.floatingEl) {
             activePreview.floatingEl.style.transition = `transform ${COMMIT_MS}ms ease-in`;
