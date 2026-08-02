@@ -6,6 +6,13 @@
 // tiling edge-to-edge, instead of a blank gap opening up behind the page
 // being dragged away.
 //
+// Fixed/floating UI (e.g. the shopping add-bar, in {% block floating %})
+// lives outside the transformed viewport and is handled separately: the
+// current page's own floating content slides down out of the way as you
+// drag off of it, and — if the destination page has floating content of its
+// own — a ghost of it slides up into place in sync with the drag, mirroring
+// the content preview.
+//
 // The preview is a static snapshot (its own scripts/htmx aren't executed —
 // it's discarded the moment the real navigation lands, so nothing about it
 // needs to be interactive). If the fetch hasn't resolved by the time the
@@ -25,6 +32,7 @@
     const RESISTANCE = 0.35;
     const FALLBACK_EXIT_PCT = 55;
     const FALLBACK_EXIT_MIN_OPACITY = 0.45;
+    const FLOATING_TRAVEL_PX = 150;
     const COMMIT_MS = 140;
     const SNAPBACK_MS = 180;
     const ENTRY_DIRECTION_KEY = "swipeEntryDirection";
@@ -44,7 +52,12 @@
     const viewport = document.querySelector(".swipe-viewport");
     if (!stage || !viewport) return;
 
-    // Only relevant on the fallback (no-preview) path — see loadPreview().
+    // This page's own fixed/floating element (e.g. the add-bar), if any —
+    // null on pages with no {% block floating %} content.
+    const floatingWrapper = document.querySelector(".swipe-floating");
+    const floatingContent = floatingWrapper ? floatingWrapper.firstElementChild : null;
+
+    // Only relevant on the fallback (no-preview) path.
     const entryDirection = sessionStorage.getItem(ENTRY_DIRECTION_KEY);
     if (entryDirection) {
         sessionStorage.removeItem(ENTRY_DIRECTION_KEY);
@@ -71,8 +84,8 @@
 
     // Fetches the destination page, pulls in any stylesheet it needs that
     // this page doesn't already have loaded, and returns the markup for its
-    // .swipe-viewport — everything needed to render an accurate preview.
-    async function fetchPreviewHtml(url) {
+    // .swipe-viewport and (if present) .swipe-floating content.
+    async function fetchPreviewParts(url) {
         try {
             const response = await fetch(url, {credentials: "same-origin"});
             if (!response.ok) return null;
@@ -81,8 +94,12 @@
             doc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
                 ensureStylesheet(link.getAttribute("href"));
             });
-            const source = doc.querySelector(".swipe-viewport");
-            return source ? source.innerHTML : null;
+            const viewportSource = doc.querySelector(".swipe-viewport");
+            const floatingSource = doc.querySelector(".swipe-floating");
+            return {
+                viewportHtml: viewportSource ? viewportSource.innerHTML : null,
+                floatingHtml: floatingSource && floatingSource.firstElementChild ? floatingSource.innerHTML : null,
+            };
         } catch (err) {
             return null;
         }
@@ -95,11 +112,17 @@
         return FREE_DRAG_PX + (distance - FREE_DRAG_PX) * RESISTANCE;
     }
 
+    // 0 (untouched) -> 1 (fully travelled), independent of the horizontal
+    // dampening curve — the floating UI only needs to clear its own height.
+    function floatingProgress(dampened) {
+        return Math.min(Math.abs(dampened) / FLOATING_TRAVEL_PX, 1);
+    }
+
     let startX = null;
     let startY = null;
     let dragDirection = null; // "left" | "right" | null
     let lastDampened = 0;
-    let preview = null; // {el, ready} for the in-flight/loaded ghost panel
+    let preview = null; // {el, ready, floatingEl} for the in-flight/loaded ghost panel
 
     function startPreview(direction) {
         const el = document.createElement("div");
@@ -107,14 +130,27 @@
         el.style.transition = "none";
         el.style.transform = `translateX(${direction === "left" ? window.innerWidth : -window.innerWidth}px)`;
         stage.appendChild(el);
-        const state = {el, ready: false};
-        fetchPreviewHtml(targetFor(direction)).then((html) => {
-            if (state.discarded || html === null) return;
-            el.innerHTML = html;
+
+        const state = {el, ready: false, floatingEl: null};
+
+        fetchPreviewParts(targetFor(direction)).then((parts) => {
+            if (state.discarded || !parts || parts.viewportHtml === null) return;
+            el.innerHTML = parts.viewportHtml;
             state.ready = true;
             // Snap to wherever the drag already is — no animation, just catch up.
             positionPreview(state, direction, lastDampened);
+
+            if (parts.floatingHtml) {
+                const floatingGhost = document.createElement("div");
+                floatingGhost.className = "swipe-floating-preview";
+                floatingGhost.style.transition = "none";
+                floatingGhost.innerHTML = parts.floatingHtml;
+                document.body.appendChild(floatingGhost);
+                state.floatingEl = floatingGhost;
+                positionFloatingGhost(state, lastDampened);
+            }
         });
+
         return state;
     }
 
@@ -124,10 +160,19 @@
         state.el.style.transform = `translateX(${base + dampened}px)`;
     }
 
+    // The floating ghost always represents "arriving" — it reveals (slides
+    // up from fully hidden) as the drag progresses, regardless of direction,
+    // since it only ever appears when the destination has floating content.
+    function positionFloatingGhost(state, dampened) {
+        if (!state || !state.floatingEl) return;
+        state.floatingEl.style.transform = `translateY(${(1 - floatingProgress(dampened)) * 100}%)`;
+    }
+
     function discardPreview(state) {
         if (!state) return;
         state.discarded = true;
         if (state.el && state.el.parentNode) state.el.remove();
+        if (state.floatingEl && state.floatingEl.parentNode) state.floatingEl.remove();
     }
 
     function clearInlineStyles(el) {
@@ -144,15 +189,25 @@
         viewport.style.transform = "translateX(0)";
         viewport.style.opacity = "";
 
+        if (floatingContent) {
+            floatingContent.style.transition = transition;
+            floatingContent.style.transform = "translateY(0)";
+        }
+
         const activePreview = preview;
         if (activePreview && activePreview.el) {
             activePreview.el.style.transition = transition;
             activePreview.el.style.transform = `translateX(${direction === "left" ? window.innerWidth : -window.innerWidth}px)`;
         }
+        if (activePreview && activePreview.floatingEl) {
+            activePreview.floatingEl.style.transition = transition;
+            activePreview.floatingEl.style.transform = "translateY(100%)";
+        }
         preview = null;
 
         const finish = () => {
             clearInlineStyles(viewport);
+            if (floatingContent) clearInlineStyles(floatingContent);
             discardPreview(activePreview);
         };
         if (duration === 0) {
@@ -169,6 +224,7 @@
         dragDirection = null;
         lastDampened = 0;
         viewport.style.transition = "none";
+        if (floatingContent) floatingContent.style.transition = "none";
         if (preview) {
             discardPreview(preview);
             preview = null;
@@ -206,6 +262,12 @@
             // No preview yet (still loading) — dim slightly so the drag still
             // has some feedback instead of looking inert.
             viewport.style.opacity = String(1 - Math.min(Math.abs(dampened) / window.innerWidth, 0.5));
+        }
+        if (floatingContent) {
+            floatingContent.style.transform = `translateY(${floatingProgress(dampened) * 100}%)`;
+        }
+        if (preview && preview.floatingEl) {
+            positionFloatingGhost(preview, dampened);
         }
     }, {passive: false});
 
@@ -255,6 +317,15 @@
             viewport.style.transform = `translateX(${direction === "left" ? -FALLBACK_EXIT_PCT : FALLBACK_EXIT_PCT}%)`;
             viewport.style.opacity = String(FALLBACK_EXIT_MIN_OPACITY);
             discardPreview(activePreview);
+        }
+
+        if (floatingContent) {
+            floatingContent.style.transition = `transform ${COMMIT_MS}ms ease-in`;
+            floatingContent.style.transform = "translateY(100%)";
+        }
+        if (usingPreview && activePreview.floatingEl) {
+            activePreview.floatingEl.style.transition = `transform ${COMMIT_MS}ms ease-in`;
+            activePreview.floatingEl.style.transform = "translateY(0)";
         }
 
         setTimeout(() => {

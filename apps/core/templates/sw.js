@@ -1,5 +1,5 @@
 {% load static %}
-const CACHE_NAME = "home-hub-v7";
+const CACHE_NAME = "home-hub-v8";
 const PRECACHE_URLS = [
     "{% static 'base.css' %}",
     "{% static 'shell.css' %}",

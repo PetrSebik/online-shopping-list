@@ -70,9 +70,13 @@
         {# Fixed/floating page UI (e.g. the shopping add-bar) goes here, not in
            {% block body %}: position:fixed inside a transformed ancestor
            (the swipe-viewport/swipe-preview drag) would otherwise slide along
-           with the drag instead of staying pinned to the viewport. #}
-        {% block floating %}
-        {% endblock %}
+           with the drag instead of staying pinned to the viewport. swipe_nav.js
+           slides its (fixed-position) child down/up in sync with the drag
+           instead of leaving it static. #}
+        <div class="swipe-floating">
+            {% block floating %}
+            {% endblock %}
+        </div>
     </div>
 </div>
 

@@ -39,6 +39,18 @@ h1, h2, h3 {
 .swipe-viewport { touch-action: pan-y; }
 .swipe-preview { pointer-events: none; }
 
+/* Ghost stand-in for a destination page's floating UI (e.g. the shopping
+   add-bar), shown sliding up in sync with the drag when swiping toward a
+   page that has one. Mirrors .shop-add-bar's own fixed positioning so the
+   handoff to the real element lines up exactly. */
+.swipe-floating-preview {
+    position: fixed; left: 250px; right: 0; bottom: 0;
+    pointer-events: none;
+}
+@media (max-width: 992px) {
+    .swipe-floating-preview { left: 0; }
+}
+
 /* ---- top navbar --------------------------------------------------------- */
 .navbar { background: var(--rc-paper) !important; border-bottom: 1px solid var(--rc-line); }
 .navbar .open-btn { color: var(--rc-ink); }
