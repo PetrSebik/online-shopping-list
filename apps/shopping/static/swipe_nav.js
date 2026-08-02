@@ -128,26 +128,33 @@
         const el = document.createElement("div");
         el.className = "swipe-preview";
         el.style.transition = "none";
-        el.style.transform = `translateX(${direction === "left" ? window.innerWidth : -window.innerWidth}px)`;
         stage.appendChild(el);
 
         const state = {el, ready: false, floatingEl: null};
+        // Position immediately, before the fetch even starts, so the ghost
+        // tracks the drag from the very first touchmove — filling in the
+        // real markup later shouldn't also mean a delayed/jumpy start.
+        positionPreview(state, direction, lastDampened);
+
+        // Shopping is the only page with floating content — if this drag is
+        // heading there, create its ghost now (not gated on the fetch) so it
+        // tracks the drag the same way the real add-bar's hide side does.
+        // The fetch just fills in the real markup whenever it resolves.
+        if (direction === "right") {
+            const floatingGhost = document.createElement("div");
+            floatingGhost.className = "swipe-floating-preview";
+            floatingGhost.style.transition = "none";
+            document.body.appendChild(floatingGhost);
+            state.floatingEl = floatingGhost;
+            positionFloatingGhost(state, lastDampened);
+        }
 
         fetchPreviewParts(targetFor(direction)).then((parts) => {
             if (state.discarded || !parts || parts.viewportHtml === null) return;
             el.innerHTML = parts.viewportHtml;
             state.ready = true;
-            // Snap to wherever the drag already is — no animation, just catch up.
-            positionPreview(state, direction, lastDampened);
-
-            if (parts.floatingHtml) {
-                const floatingGhost = document.createElement("div");
-                floatingGhost.className = "swipe-floating-preview";
-                floatingGhost.style.transition = "none";
-                floatingGhost.innerHTML = parts.floatingHtml;
-                document.body.appendChild(floatingGhost);
-                state.floatingEl = floatingGhost;
-                positionFloatingGhost(state, lastDampened);
+            if (parts.floatingHtml && state.floatingEl) {
+                state.floatingEl.innerHTML = parts.floatingHtml;
             }
         });
 
@@ -256,12 +263,8 @@
         const dampened = dampen(Math.abs(deltaX)) * (dragDirection === "left" ? -1 : 1);
         lastDampened = dampened;
         viewport.style.transform = `translateX(${dampened}px)`;
-        if (preview && preview.ready) {
+        if (preview) {
             positionPreview(preview, dragDirection, dampened);
-        } else {
-            // No preview yet (still loading) — dim slightly so the drag still
-            // has some feedback instead of looking inert.
-            viewport.style.opacity = String(1 - Math.min(Math.abs(dampened) / window.innerWidth, 0.5));
         }
         if (floatingContent) {
             floatingContent.style.transform = `translateY(${floatingProgress(dampened) * 100}%)`;
