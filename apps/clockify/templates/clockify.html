@@ -47,20 +47,26 @@
                         <div class="status-hint mt-2">No working days left this month to close the gap.</div>
                     {% endif %}
 
-                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mt-2">
-                        <div>
+                    <div class="d-flex align-items-center justify-content-between gap-2 mt-2">
+                        <div class="status-earnings">
                             {% if projected_earnings %}
-                                <div class="status-earnings">
-                                    Projected: {{ projected_total_hours }} · ≈ {{ projected_earnings }} Kč
-                                </div>
-                            {% endif %}
-                            {% if adjustment_hours_total_display %}
-                                <div class="status-earnings">
-                                    <i class="bi bi-journal-check me-1"></i>{{ adjustment_hours_total_display }} written off (unpaid) counts toward your progress above, but not toward the projected total or earnings.
-                                </div>
+                                Projected: {{ projected_total_hours }} · ≈ {{ projected_earnings }} Kč
                             {% endif %}
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                        <button type="button" class="btn btn-sm btn-outline-secondary icon-btn flex-shrink-0"
+                                data-bs-toggle="collapse" data-bs-target="#logHoursSection"
+                                aria-expanded="false" aria-controls="logHoursSection" aria-label="Log hours">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    </div>
+
+                    <div class="collapse mt-2" id="logHoursSection">
+                        {% if adjustment_hours_total_display %}
+                            <div class="status-earnings mb-2">
+                                <i class="bi bi-journal-check me-1"></i>{{ adjustment_hours_total_display }} written off - counts toward progress, not earnings.
+                            </div>
+                        {% endif %}
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
                                 data-bs-toggle="modal" data-bs-target="#logHoursModal">
                             <i class="bi bi-pencil-square me-1"></i>Log hours
                         </button>
@@ -212,6 +218,15 @@
             font-weight: 800;
             color: #212529;
             line-height: 1.2;
+        }
+
+        .icon-btn {
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .status-card.status-behind {
