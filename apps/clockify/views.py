@@ -121,11 +121,11 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         total_hours += in_progress_hours
         today_hours += in_progress_hours
 
-        # Manually written-off hours are unpaid, so they never count as worked hours -
-        # total_hours/today_hours (and everything derived straight from them: the "X
-        # worked" figure, the month bar, the projected total and the earnings estimate)
-        # stay exactly as fetched from Clockify. They only count toward *closing the
-        # gap* to the target below, via credited_hours.
+        # Manually written-off hours are unpaid, so they're kept out of total_hours/
+        # today_hours itself - the projected total and the earnings estimate below stay
+        # based on those, exactly as fetched from Clockify. credited_hours folds the
+        # write-off back in wherever progress toward the target is shown (the status
+        # card and the month bar), so those two stay in sync with each other.
         month_adjustments = HourAdjustment.objects.filter(
             settings=clockify_setting, date__year=year, date__month=month, date__lte=today,
         )
@@ -141,7 +141,7 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         total_working_days = Vacation.working_days_this_month()
 
         percent_days_passed = round(working_days_passed / total_working_days * 100) if total_working_days else 0
-        percent_hours_done = round(float(total_hours) / float(total_plan_hours) * 100) if total_plan_hours else 0
+        percent_hours_done = round(float(credited_hours) / float(total_plan_hours) * 100) if total_plan_hours else 0
 
         remaining_working_days = max(total_working_days - working_days_passed, 0)
         remaining_hours = total_plan_hours - credited_hours
@@ -175,7 +175,6 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
 
         # Month bar: caught up (or ahead) is green; each percentage point behind the
         # expected-by-today pace shifts one shade toward red, maxing out at 10pts behind.
-        # Tracks actual worked hours only - written-off hours don't repaint this bar.
         deficit_points = max(0, min(10, percent_days_passed - percent_hours_done))
         month_bar_color = quantized_progress_color(1 - deficit_points / 10)
 
@@ -208,7 +207,7 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
             "today_bar_color": today_bar_color,
             "today_behind": diff_today < 0,
             "today_ahead": diff_today > 0,
-            "total_hours": self.format_hours_minutes(total_hours),
+            "total_hours": self.format_hours_minutes(credited_hours),
             "plan_hours_passed": self.format_hours_minutes(plan_hours_passed),
             "hours_per_day_plan": self.format_hours_minutes(clockify_setting.hours_per_day_plan),
             "total_plan_hours": self.format_hours_minutes(total_plan_hours),

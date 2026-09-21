@@ -56,7 +56,7 @@
                             {% endif %}
                             {% if adjustment_hours_total_display %}
                                 <div class="status-earnings">
-                                    <i class="bi bi-journal-check me-1"></i>{{ adjustment_hours_total_display }} written off (unpaid) counts toward the target above, but not toward worked hours or earnings.
+                                    <i class="bi bi-journal-check me-1"></i>{{ adjustment_hours_total_display }} written off (unpaid) counts toward your progress above, but not toward the projected total or earnings.
                                 </div>
                             {% endif %}
                         </div>
@@ -158,8 +158,9 @@
                         <div class="modal-body">
                             <p class="small text-muted">
                                 Write off hours toward this month's target (e.g. unpaid time you're excused
-                                from making up). This closes the gap shown above - it won't change the
-                                monthly target or daily plan, and it isn't counted as worked hours or earnings.
+                                from making up). This closes the gap and updates the progress bar below -
+                                it won't change the monthly target or daily plan, and it isn't counted
+                                toward the projected total or earnings.
                             </p>
                             <div class="mb-3">
                                 <label for="adjustmentDate" class="form-label small">Date</label>
