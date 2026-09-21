@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ClockifySettings, Vacation
+from .models import ClockifySettings, HourAdjustment, Vacation
 
 
 @admin.register(ClockifySettings)
@@ -11,3 +11,9 @@ class ClockifySettingsAdmin(admin.ModelAdmin):
 @admin.register(Vacation)
 class VacationAdmin(admin.ModelAdmin):
     list_display = ('date_from', 'date_to')
+
+
+@admin.register(HourAdjustment)
+class HourAdjustmentAdmin(admin.ModelAdmin):
+    list_display = ('settings', 'date', 'hours', 'note')
+    list_filter = ('settings',)

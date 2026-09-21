@@ -1,14 +1,15 @@
 import calendar
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
 import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.timezone import now
 from django.views.generic import TemplateView
 
-from .models import ClockifySettings, Vacation
+from .forms import HourAdjustmentForm
+from .models import ClockifySettings, HourAdjustment, Vacation
 from .utils import get_working_days_in_month, get_working_days_passed, quantized_progress_color
 
 
@@ -120,19 +121,30 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         total_hours += in_progress_hours
         today_hours += in_progress_hours
 
+        # Manually written-off hours are unpaid, so they never count as worked hours -
+        # total_hours/today_hours (and everything derived straight from them: the "X
+        # worked" figure, the month bar, the projected total and the earnings estimate)
+        # stay exactly as fetched from Clockify. They only count toward *closing the
+        # gap* to the target below, via credited_hours.
+        month_adjustments = HourAdjustment.objects.filter(
+            settings=clockify_setting, date__year=year, date__month=month, date__lte=today,
+        )
+        adjustment_hours_total = sum((a.hours for a in month_adjustments), Decimal(0))
+        credited_hours = total_hours + adjustment_hours_total
+
         is_vacation_today = Vacation.objects.filter(date_from__lte=today, date_to__gte=today).exists()
         is_working_day_today = today.weekday() < 5 and not is_vacation_today
 
         plan_hours_passed = clockify_setting.hours_per_day_plan * working_days_passed
         total_plan_hours = clockify_setting.total_hours_plan
-        diff_hours = total_hours - plan_hours_passed
+        diff_hours = credited_hours - plan_hours_passed
         total_working_days = Vacation.working_days_this_month()
 
         percent_days_passed = round(working_days_passed / total_working_days * 100) if total_working_days else 0
         percent_hours_done = round(float(total_hours) / float(total_plan_hours) * 100) if total_plan_hours else 0
 
         remaining_working_days = max(total_working_days - working_days_passed, 0)
-        remaining_hours = total_plan_hours - total_hours
+        remaining_hours = total_plan_hours - credited_hours
         target_met = remaining_hours <= 0
 
         # Today still has hours left to log, so it counts as one of the days you can
@@ -142,8 +154,11 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
         # Use hours logged before today, not the live total, so the target doesn't
         # shrink as today's hours come in - today is still a full slot to fill, not
         # one that's already partially spent from the catch-up pace's point of view.
+        # Written-off hours are folded in here (regardless of which day they're dated),
+        # so they immediately shrink how much you still need to catch up on.
         hours_before_today = total_hours - today_hours
-        remaining_hours_for_catchup = total_plan_hours - hours_before_today
+        credited_hours_before_today = credited_hours - today_hours
+        remaining_hours_for_catchup = total_plan_hours - credited_hours_before_today
 
         if catch_up_days > 0 and not target_met:
             required_hours_per_day = remaining_hours_for_catchup / catch_up_days
@@ -160,12 +175,14 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
 
         # Month bar: caught up (or ahead) is green; each percentage point behind the
         # expected-by-today pace shifts one shade toward red, maxing out at 10pts behind.
+        # Tracks actual worked hours only - written-off hours don't repaint this bar.
         deficit_points = max(0, min(10, percent_days_passed - percent_hours_done))
         month_bar_color = quantized_progress_color(1 - deficit_points / 10)
 
         # Today's partial hours shouldn't drag the pace down while it's still in progress -
         # average only over fully completed working days, then assume today (and the rest
         # of the month) continues at that same pace, rather than at today's still-low rate.
+        # Uses actual worked hours only, since this feeds the earnings estimate below.
         completed_working_days = working_days_passed - (1 if is_working_day_today else 0)
 
         if completed_working_days > 0:
@@ -213,5 +230,21 @@ class ClockifyMonthlySummaryView(LoginRequiredMixin, TemplateView):
             "projected_ahead": projected_diff > 0,
             "projected_behind": projected_diff < 0,
             "projected_earnings": projected_earnings,
+            "clockify_uuid": clockify_setting.id,
+            "today_iso": today.isoformat(),
+            "month_start_iso": date(year, month, 1).isoformat(),
+            "adjustment_hours_total_display": (
+                self.format_hours_minutes(adjustment_hours_total) if adjustment_hours_total > 0 else None
+            ),
         }
         return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        uuid = kwargs.get("uuid")
+        clockify_setting = get_object_or_404(ClockifySettings, pk=uuid)
+        form = HourAdjustmentForm(request.POST)
+        if form.is_valid():
+            adjustment = form.save(commit=False)
+            adjustment.settings = clockify_setting
+            adjustment.save()
+        return redirect("clockify-report", uuid=uuid)

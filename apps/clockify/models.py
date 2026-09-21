@@ -41,6 +41,25 @@ class ClockifySettings(models.Model):
         return f"Clockify Settings {self.id} for user {self.user_id}"
 
 
+class HourAdjustment(models.Model):
+    """A manual hours credit for work done but not tracked in Clockify.
+
+    Folded into total/today hours before the catch-up math runs, so it closes
+    the gap to the target without shrinking the target or the daily plan.
+    """
+    settings = models.ForeignKey(ClockifySettings, on_delete=models.CASCADE, related_name="adjustments")
+    date = models.DateField(default=date.today)
+    hours = models.DecimalField(max_digits=5, decimal_places=2)
+    note = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-date", "-created_at"]
+
+    def __str__(self):
+        return f"{self.date} +{self.hours}h for {self.settings_id}"
+
+
 class Vacation(models.Model):
     date_from = models.DateField()
     date_to = models.DateField()
